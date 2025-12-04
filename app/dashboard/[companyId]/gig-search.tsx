@@ -130,7 +130,8 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 				{Object.entries(SOURCE_INFO).slice(0, 6).map(([key, info]) => (
 					<span
 						key={key}
-						className={`px-3 py-1.5 ${info.color} rounded-lg text-xs text-white font-medium`}
+						style={{ backgroundColor: info.color }}
+						className="px-3 py-1.5 rounded-lg text-xs text-white font-medium"
 					>
 						{info.name}
 					</span>
@@ -198,7 +199,8 @@ function GigResultCard({
 					{/* Source Tag */}
 					<div className="flex items-center gap-2 mb-2">
 						<span
-							className={`px-2.5 py-1 rounded-md text-xs font-medium ${source.color} text-white`}
+							style={{ backgroundColor: source.color }}
+							className="px-2.5 py-1 rounded-md text-xs font-medium text-white"
 						>
 							{source.name}
 						</span>

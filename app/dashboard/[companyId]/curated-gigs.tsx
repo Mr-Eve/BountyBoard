@@ -115,7 +115,8 @@ function CuratedGigCard({
 				<div className="flex-1 min-w-0">
 					<div className="flex items-center gap-2 mb-1">
 						<span
-							className={`px-2.5 py-0.5 rounded text-xs font-medium ${source.color} text-white`}
+							style={{ backgroundColor: source.color }}
+							className="px-2.5 py-0.5 rounded text-xs font-medium text-white"
 						>
 							{source.name}
 						</span>

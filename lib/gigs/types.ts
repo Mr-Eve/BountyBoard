@@ -66,64 +66,64 @@ export interface ScrapeResult {
 	errors?: { source: GigSource; error: string }[];
 }
 
-// Source display info
+// Source display info - using hex colors for inline styles (Tailwind purges dynamic classes)
 export const GIG_SOURCE_INFO: Record<
 	GigSource,
 	{ name: string; color: string; baseUrl: string }
 > = {
 	upwork: {
 		name: "Upwork",
-		color: "bg-green-600",
+		color: "#16a34a", // green-600
 		baseUrl: "https://www.upwork.com",
 	},
 	freelancer: {
 		name: "Freelancer",
-		color: "bg-blue-600",
+		color: "#2563eb", // blue-600
 		baseUrl: "https://www.freelancer.com",
 	},
 	fiverr: {
 		name: "Fiverr",
-		color: "bg-emerald-500",
+		color: "#10b981", // emerald-500
 		baseUrl: "https://www.fiverr.com",
 	},
 	toptal: {
 		name: "Toptal",
-		color: "bg-indigo-600",
+		color: "#4f46e5", // indigo-600
 		baseUrl: "https://www.toptal.com",
 	},
 	guru: {
 		name: "Guru",
-		color: "bg-sky-600",
+		color: "#0284c7", // sky-600
 		baseUrl: "https://www.guru.com",
 	},
 	peopleperhour: {
 		name: "PeoplePerHour",
-		color: "bg-orange-500",
+		color: "#f97316", // orange-500
 		baseUrl: "https://www.peopleperhour.com",
 	},
 	remoteok: {
 		name: "RemoteOK",
-		color: "bg-violet-600",
+		color: "#7c3aed", // violet-600
 		baseUrl: "https://remoteok.com",
 	},
 	weworkremotely: {
 		name: "We Work Remotely",
-		color: "bg-yellow-600",
+		color: "#ca8a04", // yellow-600
 		baseUrl: "https://weworkremotely.com",
 	},
 	linkedin: {
 		name: "LinkedIn",
-		color: "bg-blue-700",
+		color: "#1d4ed8", // blue-700
 		baseUrl: "https://www.linkedin.com/jobs",
 	},
 	indeed: {
 		name: "Indeed",
-		color: "bg-purple-600",
+		color: "#9333ea", // purple-600
 		baseUrl: "https://www.indeed.com",
 	},
 	manual: {
 		name: "Manual",
-		color: "bg-gray-600",
+		color: "#4b5563", // gray-600
 		baseUrl: "",
 	},
 };

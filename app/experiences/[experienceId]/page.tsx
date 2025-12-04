@@ -139,11 +139,12 @@ function SourcePill({
 	return (
 		<a
 			href={href}
+			style={!active && color ? { backgroundColor: color } : undefined}
 			className={`shrink-0 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
 				active
 					? "bg-gradient-to-r from-amber-500 to-orange-500 text-black"
 					: color
-					? `${color} text-white hover:opacity-80`
+					? "text-white hover:opacity-80"
 					: "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"
 			}`}
 		>
@@ -165,7 +166,8 @@ function GigCard({ curatedGig }: { curatedGig: CuratedGig }) {
 				{/* Header */}
 				<div className="flex items-start justify-between gap-4 mb-4">
 					<span
-						className={`px-3 py-1 rounded-lg ${source.color} text-white text-xs font-medium`}
+						style={{ backgroundColor: source.color }}
+						className="px-3 py-1 rounded-lg text-white text-xs font-medium"
 					>
 						{source.name}
 					</span>

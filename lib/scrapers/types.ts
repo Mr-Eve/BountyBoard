@@ -78,16 +78,16 @@ export interface ScrapeResult {
 	scrapedAt: string;
 }
 
-// Source display info
+// Source display info - using hex colors for inline styles (Tailwind purges dynamic classes)
 export const SOURCE_INFO: Record<GigSource, { name: string; color: string }> = {
-	upwork: { name: "Upwork", color: "bg-green-500" },
-	freelancer: { name: "Freelancer", color: "bg-blue-500" },
-	fiverr: { name: "Fiverr", color: "bg-emerald-500" },
-	toptal: { name: "Toptal", color: "bg-indigo-500" },
-	indeed: { name: "Indeed", color: "bg-purple-500" },
-	linkedin: { name: "LinkedIn", color: "bg-sky-500" },
-	remoteok: { name: "RemoteOK", color: "bg-rose-500" },
-	weworkremotely: { name: "We Work Remotely", color: "bg-amber-500" },
-	manual: { name: "Manual", color: "bg-gray-500" },
+	upwork: { name: "Upwork", color: "#22c55e" }, // green-500
+	freelancer: { name: "Freelancer", color: "#3b82f6" }, // blue-500
+	fiverr: { name: "Fiverr", color: "#10b981" }, // emerald-500
+	toptal: { name: "Toptal", color: "#6366f1" }, // indigo-500
+	indeed: { name: "Indeed", color: "#a855f7" }, // purple-500
+	linkedin: { name: "LinkedIn", color: "#0ea5e9" }, // sky-500
+	remoteok: { name: "RemoteOK", color: "#f43f5e" }, // rose-500
+	weworkremotely: { name: "We Work Remotely", color: "#f59e0b" }, // amber-500
+	manual: { name: "Manual", color: "#6b7280" }, // gray-500
 };
 
