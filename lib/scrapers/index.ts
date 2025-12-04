@@ -3,7 +3,9 @@
 import type { Scraper, SearchOptions } from "./base";
 import type { GigSource, ScrapedGig, ScrapeResult, CuratedGig, SearchQuery } from "./types";
 import { RemoteOKScraper } from "./remoteok";
-import { MockScraper, searchAllMock } from "./mock";
+import { ArbeitnowScraper } from "./arbeitnow";
+import { HimalayasScraper } from "./himalayas";
+import { JSearchScraper } from "./jsearch";
 
 // Database imports (used when POSTGRES_URL is available)
 import {
@@ -21,11 +23,19 @@ export * from "./base";
 // Check if database is configured
 const useDatabase = !!process.env.POSTGRES_URL;
 
-// Available scrapers
+// Available scrapers - ALL REAL, NO MOCKS
 const scrapers: Map<GigSource, Scraper> = new Map([
+	// Free public APIs
 	["remoteok", new RemoteOKScraper()],
-	// Add more scrapers here as they're implemented
+	["arbeitnow", new ArbeitnowScraper()],
+	["himalayas", new HimalayasScraper()],
+	// JSearch aggregator (requires RAPIDAPI_KEY for Indeed/LinkedIn)
+	["indeed", new JSearchScraper("indeed")],
+	["linkedin", new JSearchScraper("linkedin")],
 ]);
+
+// Default sources to search (free APIs that don't require keys)
+const DEFAULT_SOURCES: GigSource[] = ["remoteok", "arbeitnow", "himalayas"];
 
 // In-memory stores (fallback when no database)
 const searchQueries: Map<string, SearchQuery> = new Map();
@@ -35,40 +45,40 @@ const scrapedGigsCache: Map<string, ScrapedGig[]> = new Map();
 // Search for gigs across multiple sources
 export async function searchGigs(
 	query: string,
-	sources: GigSource[] = ["remoteok"],
+	sources: GigSource[] = DEFAULT_SOURCES,
 	options?: SearchOptions
 ): Promise<ScrapeResult[]> {
-	// For demo/testing, use mock data if no real scrapers available
-	const useMock = process.env.USE_MOCK_SCRAPERS === "true" || sources.length === 0;
-	
-	if (useMock) {
-		return searchAllMock(query, options);
-	}
-
 	const results: ScrapeResult[] = [];
 
-	for (const source of sources) {
+	// Search all requested sources in parallel
+	const searchPromises = sources.map(async (source) => {
 		const scraper = scrapers.get(source);
 		if (scraper) {
 			try {
-				const result = await scraper.search(query, options);
-				results.push(result);
+				return await scraper.search(query, options);
 			} catch (error) {
-				results.push({
+				return {
 					source,
 					success: false,
 					gigs: [],
 					error: error instanceof Error ? error.message : "Unknown error",
 					scrapedAt: new Date().toISOString(),
-				});
+				} as ScrapeResult;
 			}
 		} else {
-			// Use mock for unsupported sources
-			const mockScraper = new MockScraper(source);
-			const result = await mockScraper.search(query, options);
-			results.push(result);
+			// Source not supported
+			return {
+				source,
+				success: false,
+				gigs: [],
+				error: `Scraper for ${source} is not implemented. Available: ${Array.from(scrapers.keys()).join(", ")}`,
+				scrapedAt: new Date().toISOString(),
+			} as ScrapeResult;
 		}
-	}
+	});
+
+	const searchResults = await Promise.all(searchPromises);
+	results.push(...searchResults);
 
 	return results;
 }

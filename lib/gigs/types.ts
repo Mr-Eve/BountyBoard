@@ -32,6 +32,8 @@ export type GigSource =
 	| "weworkremotely"
 	| "linkedin"
 	| "indeed"
+	| "arbeitnow"
+	| "himalayas"
 	| "manual"; // For manually added gigs
 
 export interface CuratedGig extends ExternalGig {
@@ -120,6 +122,16 @@ export const GIG_SOURCE_INFO: Record<
 		name: "Indeed",
 		color: "#9333ea", // purple-600
 		baseUrl: "https://www.indeed.com",
+	},
+	arbeitnow: {
+		name: "Arbeitnow",
+		color: "#14b8a6", // teal-500
+		baseUrl: "https://www.arbeitnow.com",
+	},
+	himalayas: {
+		name: "Himalayas",
+		color: "#8b5cf6", // violet-500
+		baseUrl: "https://himalayas.app",
 	},
 	manual: {
 		name: "Manual",

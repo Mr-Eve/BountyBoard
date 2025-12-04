@@ -29,8 +29,8 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 				body: JSON.stringify({
 					query: query.trim(),
 					companyId,
-					sources: ["upwork", "freelancer", "remoteok", "linkedin", "indeed"],
-					options: { limit: 20 },
+					sources: ["remoteok", "arbeitnow", "himalayas"],
+					options: { limit: 30 },
 				}),
 			});
 

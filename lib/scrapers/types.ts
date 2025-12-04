@@ -33,6 +33,8 @@ export type GigSource =
 	| "linkedin"
 	| "remoteok"
 	| "weworkremotely"
+	| "arbeitnow"
+	| "himalayas"
 	| "manual";
 
 export interface ScraperConfig {
@@ -88,6 +90,8 @@ export const SOURCE_INFO: Record<GigSource, { name: string; color: string }> = {
 	linkedin: { name: "LinkedIn", color: "#0ea5e9" }, // sky-500
 	remoteok: { name: "RemoteOK", color: "#f43f5e" }, // rose-500
 	weworkremotely: { name: "We Work Remotely", color: "#f59e0b" }, // amber-500
+	arbeitnow: { name: "Arbeitnow", color: "#14b8a6" }, // teal-500
+	himalayas: { name: "Himalayas", color: "#8b5cf6" }, // violet-500
 	manual: { name: "Manual", color: "#6b7280" }, // gray-500
 };
 

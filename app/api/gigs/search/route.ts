@@ -30,10 +30,10 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
-		// Search for gigs
+		// Search for gigs - default to free API sources
 		const results = await searchGigs(
 			query,
-			sources || ["upwork", "freelancer", "remoteok"],
+			sources || ["remoteok", "arbeitnow", "himalayas"],
 			{
 				limit: options?.limit || 20,
 				minBudget: options?.minBudget,
