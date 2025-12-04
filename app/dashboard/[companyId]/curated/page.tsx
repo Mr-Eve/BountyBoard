@@ -53,10 +53,10 @@ export default async function CuratedPage({
 					<nav className="flex gap-1">
 						<TabLink href={`/dashboard/${companyId}`}>Find Gigs</TabLink>
 						<TabLink href={`/dashboard/${companyId}/curated`} active>
-							Curated ({approvedGigs.length})
+							Board ({approvedGigs.length})
 						</TabLink>
 						<TabLink href={`/dashboard/${companyId}/pending`}>
-							Pending ({pendingCount})
+							Saved ({pendingCount})
 						</TabLink>
 					</nav>
 				</div>
@@ -65,7 +65,7 @@ export default async function CuratedPage({
 			<main className="max-w-7xl mx-auto px-6 py-8">
 				<div className="mb-6">
 					<h2 className="text-2xl font-bold text-white mb-2">
-						Approved Gigs
+						Your Board
 					</h2>
 					<p className="text-white/50">
 						These gigs are visible to your community members.

@@ -53,10 +53,10 @@ export default async function PendingPage({
 					<nav className="flex gap-1">
 						<TabLink href={`/dashboard/${companyId}`}>Find Gigs</TabLink>
 						<TabLink href={`/dashboard/${companyId}/curated`}>
-							Curated ({approvedCount})
+							Board ({approvedCount})
 						</TabLink>
 						<TabLink href={`/dashboard/${companyId}/pending`} active>
-							Pending ({pendingGigs.length})
+							Saved ({pendingGigs.length})
 						</TabLink>
 					</nav>
 				</div>
@@ -65,10 +65,10 @@ export default async function PendingPage({
 			<main className="max-w-7xl mx-auto px-6 py-8">
 				<div className="mb-6">
 					<h2 className="text-2xl font-bold text-white mb-2">
-						Pending Review
+						Saved Gigs
 					</h2>
 					<p className="text-white/50">
-						Review these gigs and approve them to show to your members.
+						Gigs you've saved for later. Move them to your Board to show to members.
 					</p>
 				</div>
 

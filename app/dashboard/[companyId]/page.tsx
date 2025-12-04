@@ -58,10 +58,10 @@ export default async function DashboardPage({
 							Find Gigs
 						</TabLink>
 						<TabLink href={`/dashboard/${companyId}/curated`}>
-							Curated ({approvedCount})
+							Board ({approvedCount})
 						</TabLink>
 						<TabLink href={`/dashboard/${companyId}/pending`}>
-							Pending ({pendingCount})
+							Saved ({pendingCount})
 						</TabLink>
 					</nav>
 				</div>

@@ -19,6 +19,8 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 	const [hasSearched, setHasSearched] = useState(false);
 	const [addingGigs, setAddingGigs] = useState<Set<string>>(new Set());
 	const [addedGigs, setAddedGigs] = useState<Set<string>>(new Set());
+	const [savingGigs, setSavingGigs] = useState<Set<string>>(new Set());
+	const [savedGigs, setSavedGigs] = useState<Set<string>>(new Set());
 	const [enabledSources, setEnabledSources] = useState<Set<GigSource>>(
 		new Set(AVAILABLE_SOURCES)
 	);
@@ -75,7 +77,8 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 		}
 	};
 
-	const handleAddGig = async (gig: ScrapedGig) => {
+	// Add directly to board (approved status)
+	const handleAddToBoard = async (gig: ScrapedGig) => {
 		setAddingGigs((prev) => new Set(prev).add(gig.id));
 
 		try {
@@ -85,7 +88,7 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 				body: JSON.stringify({
 					companyId,
 					gig,
-					status: "pending",
+					status: "approved", // Goes directly to Board
 				}),
 			});
 
@@ -96,6 +99,35 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 			console.error("Failed to add gig:", error);
 		} finally {
 			setAddingGigs((prev) => {
+				const next = new Set(prev);
+				next.delete(gig.id);
+				return next;
+			});
+		}
+	};
+
+	// Save for later (pending status)
+	const handleSaveGig = async (gig: ScrapedGig) => {
+		setSavingGigs((prev) => new Set(prev).add(gig.id));
+
+		try {
+			const response = await fetch("/api/gigs/curated", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					companyId,
+					gig,
+					status: "pending", // Goes to Saved
+				}),
+			});
+
+			if (response.ok) {
+				setSavedGigs((prev) => new Set(prev).add(gig.id));
+			}
+		} catch (error) {
+			console.error("Failed to save gig:", error);
+		} finally {
+			setSavingGigs((prev) => {
 				const next = new Set(prev);
 				next.delete(gig.id);
 				return next;
@@ -257,9 +289,12 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 							<GigResultCard
 								key={gig.id}
 								gig={gig}
-								onAdd={() => handleAddGig(gig)}
+								onAddToBoard={() => handleAddToBoard(gig)}
+								onSave={() => handleSaveGig(gig)}
 								isAdding={addingGigs.has(gig.id)}
 								isAdded={addedGigs.has(gig.id)}
+								isSaving={savingGigs.has(gig.id)}
+								isSaved={savedGigs.has(gig.id)}
 							/>
 						))}
 					</div>
@@ -271,14 +306,20 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 
 function GigResultCard({
 	gig,
-	onAdd,
+	onAddToBoard,
+	onSave,
 	isAdding,
 	isAdded,
+	isSaving,
+	isSaved,
 }: {
 	gig: ScrapedGig;
-	onAdd: () => void;
+	onAddToBoard: () => void;
+	onSave: () => void;
 	isAdding: boolean;
 	isAdded: boolean;
+	isSaving: boolean;
+	isSaved: boolean;
 }) {
 	const [isExpanded, setIsExpanded] = useState(false);
 	const source = SOURCE_INFO[gig.source];
@@ -443,18 +484,35 @@ function GigResultCard({
 
 			{/* Actions */}
 			<div className="flex gap-2 mt-auto" onClick={(e) => e.stopPropagation()}>
+				{/* Save button - goes to Saved tab */}
 				<button
-					onClick={onAdd}
+					onClick={onSave}
+					disabled={isSaving || isSaved || isAdded}
+					className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+						isSaved
+							? "bg-blue-500/20 text-blue-400 cursor-default"
+							: isAdded
+							? "bg-white/5 text-white/30 cursor-default"
+							: isSaving
+							? "bg-white/10 text-white/50 cursor-wait"
+							: "bg-white/10 text-white/70 hover:bg-white/20 hover:text-white"
+					}`}
+				>
+					{isSaved ? "Saved" : isSaving ? "..." : "Save"}
+				</button>
+				{/* Add to Board button - goes directly to Board tab */}
+				<button
+					onClick={onAddToBoard}
 					disabled={isAdding || isAdded}
 					className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
 						isAdded
 							? "bg-emerald-500/20 text-emerald-400 cursor-default"
 							: isAdding
 							? "bg-white/10 text-white/50 cursor-wait"
-							: "bg-white/10 text-white/70 hover:bg-white/20 hover:text-white"
+							: "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
 					}`}
 				>
-					{isAdded ? "Added" : isAdding ? "Adding..." : "Add to Board"}
+					{isAdded ? "On Board" : isAdding ? "Adding..." : "Add to Board"}
 				</button>
 				{gig.sourceUrl && gig.sourceUrl !== "" && (
 					<a
