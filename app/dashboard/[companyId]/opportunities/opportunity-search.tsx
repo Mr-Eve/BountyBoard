@@ -44,13 +44,14 @@ export function OpportunitySearchSection({ companyId }: OpportunitySearchSection
 			});
 
 			const data = await response.json();
+			console.log("Search response:", data);
 			if (data.success) {
-				setResults(data.opportunities);
-				if (data.errors) {
+				setResults(data.opportunities || []);
+				if (data.errors && data.errors.length > 0) {
 					setErrors(data.errors);
 				}
 			} else {
-				setErrors([data.error || "Search failed"]);
+				setErrors([data.error || "Search failed - unknown error"]);
 			}
 		} catch (error) {
 			console.error("Search failed:", error);
