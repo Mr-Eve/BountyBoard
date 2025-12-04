@@ -1,44 +1,52 @@
-// BountyBoard Scraper - Finds REAL businesses lacking services you can offer
-// Uses Google Places API to find businesses, analyzes their websites for missing features
+// BountyBoard Scraper - Finds REAL businesses that could use your services
+// Uses Google Places API to find businesses, frames opportunities around YOUR service offering
 
 import type { Scraper, SearchOptions } from "./base";
 import { generateGigId } from "./base";
 import type { ScrapedGig, ScrapeResult } from "./types";
 import { getGooglePlacesScraper } from "../opportunities/scrapers/google-places";
 import { analyzeWebsite } from "../opportunities/website-analyzer";
-import { analyzeReviews, generateServiceSuggestions } from "../opportunities/analyzer";
-import type { Business, Review, MissingFeature, ServiceSuggestion } from "../opportunities/types";
+import { analyzeReviews } from "../opportunities/analyzer";
+import type { Business, MissingFeature } from "../opportunities/types";
 
-// Map service keywords to business types to search for
+// Map service keywords to business types that would benefit from that service
 const SERVICE_TO_BUSINESS_SEARCH: Record<string, string[]> = {
+	// AI/Tech services
+	"ai": ["law firm", "accounting firm", "medical practice", "real estate agency", "insurance agency"],
+	"artificial intelligence": ["law firm", "accounting firm", "medical practice", "consulting firm"],
+	"machine learning": ["e-commerce", "retail", "marketing agency", "financial services"],
+	"chatbot": ["restaurant", "hotel", "e-commerce", "customer service", "real estate"],
+	"automation": ["law firm", "accounting", "real estate", "insurance", "medical office"],
+	"data": ["retail", "restaurant", "gym", "salon", "medical practice"],
+	"analytics": ["e-commerce", "restaurant", "retail", "gym", "salon"],
+	
 	// Web development
-	"web": ["salon", "restaurant", "dentist", "gym", "spa"],
-	"website": ["salon", "restaurant", "dentist", "lawyer", "plumber"],
-	"design": ["restaurant", "boutique", "salon", "bakery", "cafe"],
+	"web": ["salon", "restaurant", "dentist", "gym", "spa", "contractor"],
+	"website": ["salon", "restaurant", "dentist", "lawyer", "plumber", "contractor"],
+	"design": ["restaurant", "boutique", "salon", "bakery", "cafe", "florist"],
+	"app": ["restaurant", "gym", "salon", "medical practice", "retail"],
 	
 	// SEO/Marketing
-	"seo": ["restaurant", "dentist", "lawyer", "plumber", "contractor"],
-	"marketing": ["restaurant", "gym", "salon", "retail"],
-	"social": ["restaurant", "cafe", "boutique", "salon", "bakery"],
+	"seo": ["restaurant", "dentist", "lawyer", "plumber", "contractor", "salon"],
+	"marketing": ["restaurant", "gym", "salon", "retail", "spa"],
+	"social": ["restaurant", "cafe", "boutique", "salon", "bakery", "gym"],
+	"content": ["law firm", "medical practice", "consulting", "real estate", "financial"],
+	"video": ["restaurant", "gym", "salon", "real estate", "retail"],
 	
-	// Booking systems
-	"booking": ["salon", "spa", "dentist", "doctor", "fitness"],
-	"schedule": ["salon", "consultant", "therapist", "tutor"],
-	"appointment": ["dentist", "doctor", "salon", "spa", "clinic"],
-	
-	// Automation
-	"chatbot": ["restaurant", "hotel", "ecommerce"],
-	"automation": ["real estate", "insurance", "agency"],
-	"crm": ["real estate", "insurance", "consultant"],
-	"email": ["retail", "restaurant", "service"],
+	// Booking/CRM
+	"booking": ["salon", "spa", "dentist", "doctor", "fitness", "consultant"],
+	"schedule": ["salon", "consultant", "therapist", "tutor", "contractor"],
+	"crm": ["real estate", "insurance", "consultant", "contractor", "law firm"],
+	"email": ["retail", "restaurant", "service", "gym", "salon"],
 	
 	// E-commerce
-	"ecommerce": ["boutique", "retail", "bakery", "artisan"],
-	"store": ["boutique", "retail", "gift shop"],
-	"shop": ["boutique", "florist", "bakery"],
+	"ecommerce": ["boutique", "retail", "bakery", "artisan", "florist"],
+	"store": ["boutique", "retail", "gift shop", "bakery"],
+	"shop": ["boutique", "florist", "bakery", "craft"],
+	"payment": ["restaurant", "salon", "contractor", "consultant"],
 };
 
-// Default location if none provided (can be overridden)
+// Default location if none provided
 const DEFAULT_LOCATION = "United States";
 
 export class BountyBoardScraper implements Scraper {
@@ -53,7 +61,6 @@ export class BountyBoardScraper implements Scraper {
 			
 			// Check if Google Places API is configured
 			if (!googleScraper.isConfigured()) {
-				// Return helpful message about needing API key
 				return {
 					source: "bountyboard",
 					success: true,
@@ -75,17 +82,20 @@ export class BountyBoardScraper implements Scraper {
 				};
 			}
 
-			// Determine what business types to search for based on query
-			const businessTypes = this.getBusinessTypesForQuery(query.toLowerCase());
+			// The user's service query - this is what THEY want to sell
+			const serviceQuery = query.trim();
+			
+			// Determine what business types would benefit from this service
+			const businessTypes = this.getBusinessTypesForService(serviceQuery.toLowerCase());
 			const location = (options as SearchOptionsWithLocation)?.location || DEFAULT_LOCATION;
 
 			// Search for businesses of each type
-			for (const businessType of businessTypes.slice(0, 3)) { // Limit to 3 types
+			for (const businessType of businessTypes.slice(0, 3)) {
 				try {
 					const searchResult = await googleScraper.searchBusinesses({
 						query: businessType,
 						location,
-						minReviews: 5, // Only businesses with some reviews
+						minReviews: 5,
 					});
 
 					if (searchResult.error) {
@@ -96,20 +106,18 @@ export class BountyBoardScraper implements Scraper {
 					// Analyze each business (limit to 3 per type for performance)
 					for (const business of searchResult.businesses.slice(0, 3)) {
 						try {
-							const opportunity = await this.analyzeBusinessOpportunity(
+							const opportunity = await this.createServiceOpportunity(
 								business,
 								googleScraper,
-								query
+								serviceQuery // Pass the original service query
 							);
 							
 							if (opportunity) {
 								gigs.push(opportunity);
 							}
 
-							// Small delay to avoid rate limiting
 							await new Promise(resolve => setTimeout(resolve, 100));
 						} catch (e) {
-							// Skip this business on error
 							console.error(`Error analyzing ${business.name}:`, e);
 						}
 					}
@@ -118,7 +126,6 @@ export class BountyBoardScraper implements Scraper {
 				}
 			}
 
-			// Apply limit
 			const limitedGigs = options?.limit ? gigs.slice(0, options.limit) : gigs;
 
 			return {
@@ -139,26 +146,28 @@ export class BountyBoardScraper implements Scraper {
 		}
 	}
 
-	// Get business types to search based on query keywords
-	private getBusinessTypesForQuery(query: string): string[] {
+	// Get business types that would benefit from this service
+	private getBusinessTypesForService(serviceQuery: string): string[] {
 		const matchedTypes = new Set<string>();
 
 		for (const [keyword, types] of Object.entries(SERVICE_TO_BUSINESS_SEARCH)) {
-			if (query.includes(keyword)) {
+			if (serviceQuery.includes(keyword)) {
 				types.forEach(t => matchedTypes.add(t));
 			}
 		}
 
-		// Default types if no matches
+		// If no matches, search for businesses that match the query directly
+		// This allows searching for specific business types too
 		if (matchedTypes.size === 0) {
-			return ["salon", "restaurant", "dentist"];
+			// Use the query itself as a business type search
+			return [serviceQuery, "small business", "local business"];
 		}
 
 		return Array.from(matchedTypes);
 	}
 
-	// Analyze a business and create an opportunity gig if there are issues
-	private async analyzeBusinessOpportunity(
+	// Create an opportunity framed around the user's service offering
+	private async createServiceOpportunity(
 		business: Business,
 		googleScraper: ReturnType<typeof getGooglePlacesScraper>,
 		serviceQuery: string
@@ -171,59 +180,52 @@ export class BountyBoardScraper implements Scraper {
 		const fullBusiness = details.business;
 		const reviews = details.reviews;
 
-		// Analyze website if available
-		let missingFeatures: MissingFeature[] = [];
+		// Analyze website for context (but not to determine the service)
+		let websiteInfo = "";
+		let hasWebsite = !!fullBusiness.website;
+		
 		if (fullBusiness.website) {
 			try {
 				const websiteAnalysis = await analyzeWebsite(fullBusiness.website);
-				missingFeatures = websiteAnalysis.missingFeatures.filter(f => f.confidence > 0.6);
+				const missingCount = websiteAnalysis.missingFeatures.filter(f => f.confidence > 0.6).length;
+				if (missingCount > 0) {
+					websiteInfo = `Website has ${missingCount} areas for improvement.`;
+				}
 			} catch {
-				// Website analysis failed, continue without it
+				// Website analysis failed
 			}
 		} else {
-			// No website is a big opportunity!
-			missingFeatures = [{
-				feature: "online_booking",
-				confidence: 1,
-				searchedFor: ["website"],
-				recommendation: "Business has no website - huge opportunity for web development",
-			}];
+			websiteInfo = "No website detected.";
 		}
 
-		// Analyze reviews for pain points
+		// Analyze reviews for pain points (for context)
 		const painPoints = analyzeReviews(reviews);
+		const painPointSummary = painPoints.length > 0 
+			? `${painPoints.length} customer pain points identified.`
+			: "";
 
-		// Generate service suggestions
-		const suggestions = generateServiceSuggestions(painPoints, missingFeatures);
-
-		// Only create opportunity if there are real issues to solve
-		if (suggestions.length === 0 && missingFeatures.length === 0 && painPoints.length === 0) {
-			return null;
-		}
-
-		// Find the most relevant suggestion based on search query
-		const relevantSuggestion = this.findRelevantSuggestion(suggestions, serviceQuery);
-		
-		// Build the opportunity description
-		const description = this.buildOpportunityDescription(
+		// Build opportunity focused on the USER'S SERVICE
+		const title = this.buildServiceTitle(fullBusiness, serviceQuery);
+		const description = this.buildServiceDescription(
 			fullBusiness,
-			relevantSuggestion,
-			painPoints,
-			missingFeatures,
-			reviews.length
+			serviceQuery,
+			reviews.length,
+			hasWebsite,
+			websiteInfo,
+			painPointSummary,
+			painPoints
 		);
 
-		// Determine estimated value
-		const estimatedValue = relevantSuggestion?.service.estimatedValue || "$500 - $2,000";
+		// Skills are based on the service query, not generic analysis
+		const skills = this.getSkillsForService(serviceQuery);
 
 		return {
 			id: generateGigId("bountyboard", `${fullBusiness.id}_${Date.now()}`),
 			source: "bountyboard",
 			sourceUrl: fullBusiness.website || `https://www.google.com/maps/place/?q=place_id:${fullBusiness.sourceId}`,
-			title: this.buildOpportunityTitle(fullBusiness, relevantSuggestion, missingFeatures),
+			title,
 			description,
-			budget: this.parseEstimatedValue(estimatedValue),
-			skills: relevantSuggestion?.service.keywords || this.getSkillsFromFeatures(missingFeatures),
+			skills,
 			postedAt: new Date().toISOString(),
 			clientInfo: {
 				name: fullBusiness.name,
@@ -232,63 +234,47 @@ export class BountyBoardScraper implements Scraper {
 				location: `${fullBusiness.city}${fullBusiness.phone ? ` | ${fullBusiness.phone}` : ""}`,
 			},
 			scrapedAt: new Date().toISOString(),
+			// Store the service query for the frontend AI summary
+			deadline: serviceQuery, // Repurposing this field to pass the service query
 		};
 	}
 
-	// Find the most relevant service suggestion based on search query
-	private findRelevantSuggestion(
-		suggestions: ServiceSuggestion[],
-		query: string
-	): ServiceSuggestion | undefined {
-		const queryLower = query.toLowerCase();
+	// Build title focused on the service being offered
+	private buildServiceTitle(business: Business, serviceQuery: string): string {
+		const serviceName = this.formatServiceName(serviceQuery);
+		return `${business.name} - ${serviceName} Opportunity - ${business.category}`;
+	}
+
+	// Format the service query into a readable service name
+	private formatServiceName(query: string): string {
+		// Capitalize and clean up the query
+		const formatted = query
+			.split(" ")
+			.map(word => word.charAt(0).toUpperCase() + word.slice(1))
+			.join(" ");
 		
-		// Try to find a suggestion that matches the query
-		for (const suggestion of suggestions) {
-			const keywords = suggestion.service.keywords.map(k => k.toLowerCase());
-			if (keywords.some(k => queryLower.includes(k) || k.includes(queryLower))) {
-				return suggestion;
-			}
+		// Add "Services" if it's a short query
+		if (query.split(" ").length <= 2 && !query.toLowerCase().includes("service")) {
+			return `${formatted} Services`;
 		}
-
-		// Return highest relevance suggestion
-		return suggestions[0];
+		return formatted;
 	}
 
-	// Build a descriptive title for the opportunity
-	private buildOpportunityTitle(
+	// Build description focused on the service opportunity
+	private buildServiceDescription(
 		business: Business,
-		suggestion: ServiceSuggestion | undefined,
-		missingFeatures: MissingFeature[]
-	): string {
-		if (!business.website) {
-			return `${business.name} needs a website - ${business.category} in ${business.city}`;
-		}
-
-		if (suggestion) {
-			return `${business.name} needs ${suggestion.service.name} - ${business.category}`;
-		}
-
-		if (missingFeatures.length > 0) {
-			const feature = this.formatFeatureName(missingFeatures[0].feature);
-			return `${business.name} missing ${feature} - ${business.category}`;
-		}
-
-		return `Service opportunity at ${business.name} - ${business.category}`;
-	}
-
-	// Build detailed description with contact info and pain points
-	private buildOpportunityDescription(
-		business: Business,
-		suggestion: ServiceSuggestion | undefined,
-		painPoints: ReturnType<typeof analyzeReviews>,
-		missingFeatures: MissingFeature[],
-		reviewCount: number
+		serviceQuery: string,
+		reviewCount: number,
+		hasWebsite: boolean,
+		websiteInfo: string,
+		painPointSummary: string,
+		painPoints: ReturnType<typeof analyzeReviews>
 	): string {
 		const parts: string[] = [];
+		const serviceName = this.formatServiceName(serviceQuery);
 
-		// Business info with contact
+		// Business info
 		parts.push(`**${business.name}** - ${business.category} in ${business.city}`);
-		
 		if (business.phone) {
 			parts.push(`Contact: ${business.phone}`);
 		}
@@ -298,110 +284,119 @@ export class BountyBoardScraper implements Scraper {
 		parts.push(`Rating: ${business.rating}/5 (${reviewCount} reviews)`);
 		parts.push("");
 
-		// What they need
-		if (suggestion) {
-			parts.push(`**Opportunity:** ${suggestion.service.description}`);
-			parts.push(`**Estimated Value:** ${suggestion.service.estimatedValue}`);
-			parts.push("");
+		// Service opportunity framing
+		parts.push(`**${serviceName} Opportunity:**`);
+		parts.push(`This ${business.category.toLowerCase()} could benefit from ${serviceQuery.toLowerCase()} services.`);
+		parts.push("");
+
+		// Why this business is a good prospect
+		parts.push("**Why this is a good prospect:**");
+		
+		if (!hasWebsite) {
+			parts.push("- No website detected - may need digital presence help");
+		} else if (websiteInfo) {
+			parts.push(`- ${websiteInfo}`);
+		}
+		
+		if (reviewCount > 20) {
+			parts.push(`- Established business with ${reviewCount} reviews`);
+		}
+		
+		if (business.rating < 4.5 && business.rating >= 3.5) {
+			parts.push("- Room for improvement in customer satisfaction");
 		}
 
-		// Missing features
-		if (missingFeatures.length > 0) {
-			parts.push("**Missing from website:**");
-			missingFeatures.slice(0, 4).forEach(f => {
-				parts.push(`- ${this.formatFeatureName(f.feature)}: ${f.recommendation}`);
-			});
-			parts.push("");
+		if (painPointSummary) {
+			parts.push(`- ${painPointSummary}`);
 		}
 
-		// Pain points from reviews
+		// Show specific pain points if relevant
 		if (painPoints.length > 0) {
-			parts.push("**Issues mentioned in reviews:**");
+			parts.push("");
+			parts.push("**Customer feedback themes:**");
 			painPoints.slice(0, 3).forEach(pp => {
 				const example = pp.examplePhrases[0] || "";
-				parts.push(`- ${this.formatPainPoint(pp.category)} (${pp.count}x): "${example.slice(0, 80)}..."`);
+				if (example) {
+					parts.push(`- "${example.slice(0, 100)}..."`);
+				}
 			});
 		}
 
 		return parts.join("\n");
 	}
 
-	// Format feature type to readable name
-	private formatFeatureName(feature: string): string {
-		const names: Record<string, string> = {
-			online_booking: "Online Booking",
-			contact_form: "Contact Form",
-			live_chat: "Live Chat",
-			newsletter_signup: "Newsletter Signup",
-			gift_cards: "Gift Cards",
-			online_ordering: "Online Ordering",
-			pricing_page: "Pricing Page",
-			faq_page: "FAQ Page",
-			testimonials: "Testimonials",
-			ssl_certificate: "SSL Certificate",
-			mobile_responsive: "Mobile Responsive",
-			social_integration: "Social Media Links",
-			google_analytics: "Analytics",
-			schema_markup: "SEO Schema",
-			blog: "Blog",
-		};
-		return names[feature] || feature.replace(/_/g, " ");
-	}
+	// Get skills based on the service query
+	private getSkillsForService(serviceQuery: string): string[] {
+		const queryLower = serviceQuery.toLowerCase();
+		const skills: string[] = [];
 
-	// Format pain point category to readable name
-	private formatPainPoint(category: string): string {
-		const names: Record<string, string> = {
-			booking_issues: "Booking problems",
-			website_problems: "Website issues",
-			slow_response: "Slow response",
-			communication: "Communication",
-			online_presence: "Hard to find online",
-			pricing_clarity: "Unclear pricing",
-			payment_options: "Payment issues",
-			customer_service: "Service complaints",
-			wait_times: "Long wait times",
-		};
-		return names[category] || category.replace(/_/g, " ");
-	}
-
-	// Get skills from missing features
-	private getSkillsFromFeatures(features: MissingFeature[]): string[] {
-		const skillMap: Record<string, string[]> = {
-			online_booking: ["Booking Systems", "Web Development"],
-			contact_form: ["Web Development", "Forms"],
-			live_chat: ["Chatbots", "Customer Service"],
-			newsletter_signup: ["Email Marketing", "Mailchimp"],
-			online_ordering: ["E-commerce", "Web Development"],
-			pricing_page: ["Copywriting", "Web Design"],
-			ssl_certificate: ["Web Security", "DevOps"],
-			mobile_responsive: ["Responsive Design", "CSS"],
-			social_integration: ["Social Media", "Web Development"],
-			google_analytics: ["Analytics", "SEO"],
-			blog: ["Content Writing", "SEO"],
-		};
-
-		const skills = new Set<string>();
-		for (const feature of features) {
-			const featureSkills = skillMap[feature.feature] || ["Web Development"];
-			featureSkills.forEach(s => skills.add(s));
+		// AI/ML related
+		if (queryLower.includes("ai") || queryLower.includes("artificial intelligence")) {
+			skills.push("AI Development", "Machine Learning", "Python", "Data Analysis");
 		}
-		return Array.from(skills).slice(0, 5);
-	}
-
-	private parseEstimatedValue(value: string): ScrapedGig["budget"] {
-		const match = value.match(/\$([0-9,]+)\s*-?\s*\$?([0-9,]+)?/);
-		if (match) {
-			const min = parseInt(match[1].replace(/,/g, ""), 10);
-			const max = match[2] ? parseInt(match[2].replace(/,/g, ""), 10) : min;
-			const isRecurring = value.includes("/month");
-			return {
-				min,
-				max,
-				type: isRecurring ? "hourly" : "fixed",
-				currency: "USD",
-			};
+		if (queryLower.includes("chatbot") || queryLower.includes("bot")) {
+			skills.push("Chatbot Development", "NLP", "Conversational AI");
 		}
-		return undefined;
+		if (queryLower.includes("automation")) {
+			skills.push("Process Automation", "Workflow Design", "Integration");
+		}
+		if (queryLower.includes("data") || queryLower.includes("analytics")) {
+			skills.push("Data Analytics", "Business Intelligence", "Reporting");
+		}
+		if (queryLower.includes("machine learning") || queryLower.includes("ml")) {
+			skills.push("Machine Learning", "Python", "TensorFlow", "Data Science");
+		}
+
+		// Web related
+		if (queryLower.includes("web") || queryLower.includes("website")) {
+			skills.push("Web Development", "HTML/CSS", "JavaScript", "Responsive Design");
+		}
+		if (queryLower.includes("design")) {
+			skills.push("UI/UX Design", "Graphic Design", "Branding");
+		}
+		if (queryLower.includes("app")) {
+			skills.push("App Development", "Mobile Development", "React Native");
+		}
+
+		// Marketing related
+		if (queryLower.includes("seo")) {
+			skills.push("SEO", "Content Strategy", "Google Analytics", "Keyword Research");
+		}
+		if (queryLower.includes("marketing")) {
+			skills.push("Digital Marketing", "Content Marketing", "Strategy");
+		}
+		if (queryLower.includes("social")) {
+			skills.push("Social Media Marketing", "Content Creation", "Community Management");
+		}
+		if (queryLower.includes("content")) {
+			skills.push("Content Writing", "Copywriting", "Content Strategy");
+		}
+		if (queryLower.includes("video")) {
+			skills.push("Video Production", "Video Editing", "Motion Graphics");
+		}
+
+		// Business services
+		if (queryLower.includes("crm")) {
+			skills.push("CRM Implementation", "Salesforce", "HubSpot");
+		}
+		if (queryLower.includes("email")) {
+			skills.push("Email Marketing", "Mailchimp", "Campaign Management");
+		}
+		if (queryLower.includes("booking") || queryLower.includes("schedule")) {
+			skills.push("Booking Systems", "Calendar Integration", "Automation");
+		}
+
+		// E-commerce
+		if (queryLower.includes("ecommerce") || queryLower.includes("store") || queryLower.includes("shop")) {
+			skills.push("E-commerce", "Shopify", "WooCommerce", "Payment Integration");
+		}
+
+		// If no specific skills matched, use the query itself
+		if (skills.length === 0) {
+			skills.push(this.formatServiceName(serviceQuery));
+		}
+
+		return skills.slice(0, 5);
 	}
 }
 

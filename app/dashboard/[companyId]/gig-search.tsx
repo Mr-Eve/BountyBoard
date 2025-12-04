@@ -471,49 +471,58 @@ function GigResultCard({
 	);
 }
 
-// Generate AI summary for BountyBoard jobs based on the description
+// Generate AI summary for BountyBoard jobs based on the service being offered
 function generateAISummary(gig: ScrapedGig): string {
-	const desc = gig.description.toLowerCase();
 	const businessName = gig.clientInfo?.name || "This business";
+	const businessCategory = gig.title.split(" - ").pop()?.replace(" Opportunity", "") || "business";
 	
-	// Detect what services are needed based on keywords in description
-	const needs: string[] = [];
+	// The service query is stored in the deadline field (repurposed)
+	const serviceQuery = gig.deadline || "";
 	
-	if (desc.includes("no website") || desc.includes("needs a website")) {
-		needs.push("a professional website");
-	}
-	if (desc.includes("online booking") || desc.includes("booking system") || desc.includes("hard to book")) {
-		needs.push("an online booking system");
-	}
-	if (desc.includes("contact form") || desc.includes("missing contact")) {
-		needs.push("a contact form");
-	}
-	if (desc.includes("seo") || desc.includes("not found on google") || desc.includes("hard to find online")) {
-		needs.push("SEO optimization");
-	}
-	if (desc.includes("social media") || desc.includes("inactive") || desc.includes("no engagement")) {
-		needs.push("social media management");
-	}
-	if (desc.includes("slow response") || desc.includes("never replied") || desc.includes("automation")) {
-		needs.push("customer communication automation");
-	}
-	if (desc.includes("mobile") || desc.includes("responsive")) {
-		needs.push("a mobile-friendly website");
-	}
-	if (desc.includes("reviews") || desc.includes("reputation")) {
-		needs.push("review management");
+	if (!serviceQuery) {
+		// Fallback for old format
+		return `${businessName} is a potential client for your services. Reach out to discuss how you can help their business grow.`;
 	}
 	
-	if (needs.length === 0) {
-		needs.push("digital improvements");
+	// Format the service name nicely
+	const serviceName = serviceQuery
+		.split(" ")
+		.map(word => word.charAt(0).toUpperCase() + word.slice(1))
+		.join(" ");
+	
+	// Generate contextual summary based on the service type
+	const serviceContexts: Record<string, string> = {
+		"ai": `${businessName} is a ${businessCategory} that could leverage AI to automate tasks, improve customer service, or gain insights from their data.`,
+		"artificial intelligence": `${businessName} could use AI solutions to streamline operations, enhance customer experiences, or make data-driven decisions.`,
+		"machine learning": `${businessName} has data from customer interactions that could be used for ML-powered recommendations, predictions, or automation.`,
+		"chatbot": `${businessName} handles customer inquiries that could be automated with a chatbot, improving response times and freeing up staff.`,
+		"automation": `${businessName} likely has repetitive processes that could be automated to save time and reduce errors.`,
+		"data": `${businessName} generates customer and business data that could be better utilized for insights and decision-making.`,
+		"analytics": `${businessName} could benefit from better analytics to understand customer behavior and optimize operations.`,
+		"web": `${businessName} could use an improved web presence to attract more customers and provide better online experiences.`,
+		"website": `${businessName} could benefit from a modern, professional website to establish credibility and capture leads.`,
+		"seo": `${businessName} could rank higher in local search results with proper SEO, bringing in more organic customers.`,
+		"marketing": `${businessName} could reach more potential customers with targeted digital marketing strategies.`,
+		"social": `${businessName} could build a stronger community and brand presence through active social media engagement.`,
+		"content": `${businessName} could establish thought leadership and attract customers through quality content marketing.`,
+		"video": `${businessName} could showcase their services and build trust with professional video content.`,
+		"crm": `${businessName} could better manage customer relationships and follow-ups with a proper CRM system.`,
+		"email": `${businessName} could nurture leads and retain customers with strategic email marketing campaigns.`,
+		"booking": `${businessName} could reduce no-shows and phone calls with an online booking system.`,
+		"ecommerce": `${businessName} could expand their revenue by selling products or services online.`,
+		"app": `${businessName} could improve customer engagement with a dedicated mobile app.`,
+	};
+	
+	// Find matching context
+	const queryLower = serviceQuery.toLowerCase();
+	for (const [keyword, context] of Object.entries(serviceContexts)) {
+		if (queryLower.includes(keyword)) {
+			return context + " This is a great outreach opportunity!";
+		}
 	}
 	
-	// Build the summary
-	const needsList = needs.length === 1 
-		? needs[0] 
-		: needs.slice(0, -1).join(", ") + " and " + needs[needs.length - 1];
-	
-	return `${businessName} could benefit from ${needsList}. This is a great outreach opportunity - reach out to offer your services.`;
+	// Generic but service-specific fallback
+	return `${businessName} is a ${businessCategory} that could benefit from ${serviceName.toLowerCase()} services. Reach out to discuss how you can help their business.`;
 }
 
 function formatTimeAgo(dateString: string): string {
