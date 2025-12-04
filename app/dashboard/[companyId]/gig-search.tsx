@@ -281,21 +281,21 @@ function GigResultCard({
 				<button
 					onClick={onAdd}
 					disabled={isAdding || isAdded}
-					className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+					className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
 						isAdded
-							? "bg-emerald-500/20 text-emerald-400 cursor-default"
+							? "bg-emerald-500 text-white cursor-default"
 							: isAdding
-							? "bg-white/10 text-white/50 cursor-wait"
-							: "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
+							? "bg-white/20 text-white/70 cursor-wait"
+							: "bg-gradient-to-r from-amber-500 to-orange-500 text-black hover:from-amber-400 hover:to-orange-400 shadow-lg shadow-amber-500/20"
 					}`}
 				>
-					{isAdded ? "Added" : isAdding ? "Adding..." : "+ Add"}
+					{isAdded ? "Added to List" : isAdding ? "Adding..." : "Add to Board"}
 				</button>
 				<a
 					href={gig.sourceUrl}
 					target="_blank"
 					rel="noopener noreferrer"
-					className="px-4 py-2 bg-white/5 text-white/50 hover:text-white rounded-lg text-sm transition-all text-center"
+					className="px-4 py-2.5 bg-white/10 text-white/70 hover:bg-white/20 hover:text-white rounded-xl text-sm font-medium transition-all text-center"
 				>
 					View
 				</a>
