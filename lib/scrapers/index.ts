@@ -6,6 +6,7 @@ import { RemoteOKScraper } from "./remoteok";
 import { ArbeitnowScraper } from "./arbeitnow";
 import { HimalayasScraper } from "./himalayas";
 import { JSearchScraper } from "./jsearch";
+import { BountyBoardScraper } from "./bountyboard";
 
 // Database imports (used when POSTGRES_URL is available)
 import {
@@ -32,9 +33,11 @@ scrapers.set("himalayas", new HimalayasScraper());
 // JSearch aggregator (requires RAPIDAPI_KEY for Indeed/LinkedIn)
 scrapers.set("indeed", new JSearchScraper("indeed"));
 scrapers.set("linkedin", new JSearchScraper("linkedin"));
+// BountyBoard - AI-generated service opportunities
+scrapers.set("bountyboard", new BountyBoardScraper());
 
-// Default sources to search (free APIs that don't require keys)
-const DEFAULT_SOURCES: GigSource[] = ["remoteok", "arbeitnow", "himalayas"];
+// Default sources to search (free APIs + BountyBoard opportunities)
+const DEFAULT_SOURCES: GigSource[] = ["remoteok", "arbeitnow", "himalayas", "bountyboard"];
 
 // In-memory stores (fallback when no database)
 const searchQueries: Map<string, SearchQuery> = new Map();

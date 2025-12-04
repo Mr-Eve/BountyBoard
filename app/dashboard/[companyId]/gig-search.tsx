@@ -32,7 +32,7 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 				body: JSON.stringify({
 					query: query.trim(),
 					companyId,
-					sources: ["remoteok", "arbeitnow", "himalayas"],
+					sources: ["remoteok", "arbeitnow", "himalayas", "bountyboard"],
 					options: { limit: 50 }, // Request more since some will be filtered
 					language: browserLang,
 				}),
@@ -80,10 +80,10 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 	return (
 		<div>
 			<h2 className="text-xl font-semibold text-white mb-4">
-				Search for Gigs
+				Search for Gigs & Opportunities
 			</h2>
 			<p className="text-white/50 text-sm mb-6">
-				Search across multiple freelance platforms to find opportunities for your community members.
+				Search freelance platforms for jobs, plus discover BountyBoard opportunities - service ideas for local businesses based on their pain points.
 			</p>
 
 			{/* Search Input */}
@@ -94,7 +94,7 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 						value={query}
 						onChange={(e) => setQuery(e.target.value)}
 						onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-						placeholder="Search for gigs... (e.g., 'React developer', 'logo design', 'content writing')"
+						placeholder="Search for gigs... (e.g., 'web design', 'SEO', 'booking system', 'social media')"
 						className="w-full px-5 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-amber-500/50 focus:bg-white/[0.07] transition-all"
 					/>
 				</div>
@@ -129,17 +129,25 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 				</button>
 			</div>
 
-			{/* Source Pills */}
+			{/* Source Pills - Show BountyBoard first */}
 			<div className="flex flex-wrap gap-2 mb-6">
-				{Object.entries(SOURCE_INFO).slice(0, 6).map(([key, info]) => (
-					<span
-						key={key}
-						style={{ backgroundColor: info.color }}
-						className="px-3 py-1.5 rounded-lg text-xs text-white font-medium"
-					>
-						{info.name}
-					</span>
-				))}
+				<span
+					style={{ backgroundColor: SOURCE_INFO.bountyboard.color }}
+					className="px-3 py-1.5 rounded-lg text-xs text-white font-medium"
+				>
+					{SOURCE_INFO.bountyboard.name} Jobs
+				</span>
+				{Object.entries(SOURCE_INFO)
+					.filter(([key]) => !["bountyboard", "manual", "upwork", "freelancer", "fiverr", "toptal", "indeed", "linkedin", "weworkremotely"].includes(key))
+					.map(([key, info]) => (
+						<span
+							key={key}
+							style={{ backgroundColor: info.color }}
+							className="px-3 py-1.5 rounded-lg text-xs text-white font-medium"
+						>
+							{info.name}
+						</span>
+					))}
 			</div>
 
 			{/* Results */}

@@ -31,11 +31,11 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
-		// Search for gigs - default to free API sources
+		// Search for gigs - default to free API sources + BountyBoard opportunities
 		// Default to English if no language specified
 		const results = await searchGigs(
 			query,
-			sources || ["remoteok", "arbeitnow", "himalayas"],
+			sources || ["remoteok", "arbeitnow", "himalayas", "bountyboard"],
 			{
 				limit: options?.limit || 20,
 				minBudget: options?.minBudget,

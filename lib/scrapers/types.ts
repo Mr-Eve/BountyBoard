@@ -35,6 +35,7 @@ export type GigSource =
 	| "weworkremotely"
 	| "arbeitnow"
 	| "himalayas"
+	| "bountyboard"
 	| "manual";
 
 export interface ScraperConfig {
@@ -92,6 +93,7 @@ export const SOURCE_INFO: Record<GigSource, { name: string; color: string }> = {
 	weworkremotely: { name: "We Work Remotely", color: "#f59e0b" }, // amber-500
 	arbeitnow: { name: "Arbeitnow", color: "#14b8a6" }, // teal-500
 	himalayas: { name: "Himalayas", color: "#8b5cf6" }, // violet-500
+	bountyboard: { name: "BountyBoard", color: "#ec4899" }, // pink-500 - AI-discovered opportunities
 	manual: { name: "Manual", color: "#6b7280" }, // gray-500
 };
 
