@@ -5,9 +5,21 @@ import type { GigSource, ScrapedGig, ScrapeResult, CuratedGig, SearchQuery } fro
 import { RemoteOKScraper } from "./remoteok";
 import { MockScraper, searchAllMock } from "./mock";
 
+// Database imports (used when POSTGRES_URL is available)
+import {
+	getCuratedGigsFromDB,
+	addCuratedGigToDB,
+	updateCuratedGigInDB,
+	deleteCuratedGigFromDB,
+	getApprovedGigsFromDB,
+} from "../db";
+
 // Export types
 export * from "./types";
 export * from "./base";
+
+// Check if database is configured
+const useDatabase = !!process.env.POSTGRES_URL;
 
 // Available scrapers
 const scrapers: Map<GigSource, Scraper> = new Map([
@@ -15,7 +27,7 @@ const scrapers: Map<GigSource, Scraper> = new Map([
 	// Add more scrapers here as they're implemented
 ]);
 
-// In-memory stores (replace with database in production)
+// In-memory stores (fallback when no database)
 const searchQueries: Map<string, SearchQuery> = new Map();
 const curatedGigs: Map<string, CuratedGig> = new Map();
 const scrapedGigsCache: Map<string, ScrapedGig[]> = new Map();
@@ -88,7 +100,13 @@ export async function addCuratedGig(
 	companyId: string,
 	gig: ScrapedGig,
 	status: CuratedGig["status"] = "pending"
-): Promise<CuratedGig> {
+): Promise<CuratedGig | null> {
+	// Use database if available
+	if (useDatabase) {
+		return addCuratedGigToDB(companyId, gig, status);
+	}
+
+	// Fallback to in-memory
 	const curatedGig: CuratedGig = {
 		id: `cg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
 		companyId,
@@ -104,6 +122,12 @@ export async function getCuratedGigs(
 	companyId: string,
 	status?: CuratedGig["status"]
 ): Promise<CuratedGig[]> {
+	// Use database if available
+	if (useDatabase) {
+		return getCuratedGigsFromDB(companyId, status);
+	}
+
+	// Fallback to in-memory
 	let gigs = Array.from(curatedGigs.values()).filter((cg) => cg.companyId === companyId);
 	if (status) {
 		gigs = gigs.filter((cg) => cg.status === status);
@@ -115,6 +139,13 @@ export async function updateCuratedGig(
 	id: string,
 	updates: Partial<Pick<CuratedGig, "status" | "notes" | "customReward">>
 ): Promise<CuratedGig | null> {
+	// Use database if available
+	if (useDatabase) {
+		const success = await updateCuratedGigInDB(id, updates);
+		return success ? { id, ...updates } as CuratedGig : null;
+	}
+
+	// Fallback to in-memory
 	const existing = curatedGigs.get(id);
 	if (!existing) return null;
 
@@ -128,11 +159,23 @@ export async function updateCuratedGig(
 }
 
 export async function deleteCuratedGig(id: string): Promise<boolean> {
+	// Use database if available
+	if (useDatabase) {
+		return deleteCuratedGigFromDB(id);
+	}
+
+	// Fallback to in-memory
 	return curatedGigs.delete(id);
 }
 
 // Get approved gigs for members to see
 export async function getApprovedGigs(companyId: string): Promise<CuratedGig[]> {
+	// Use database if available
+	if (useDatabase) {
+		return getApprovedGigsFromDB(companyId);
+	}
+
+	// Fallback to in-memory
 	return getCuratedGigs(companyId, "approved");
 }
 
