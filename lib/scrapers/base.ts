@@ -13,6 +13,7 @@ export interface SearchOptions {
 	maxBudget?: number;
 	skills?: string[];
 	language?: string; // e.g., "en", "de", "fr"
+	location?: string; // For BountyBoard jobs - city/region to search
 }
 
 // Simple language detection based on character patterns

@@ -10,6 +10,7 @@ interface GigSearchSectionProps {
 
 export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 	const [query, setQuery] = useState("");
+	const [location, setLocation] = useState("");
 	const [isSearching, setIsSearching] = useState(false);
 	const [results, setResults] = useState<ScrapedGig[]>([]);
 	const [hasSearched, setHasSearched] = useState(false);
@@ -35,6 +36,7 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 					sources: ["remoteok", "arbeitnow", "himalayas", "bountyboard"],
 					options: { limit: 50 }, // Request more since some will be filtered
 					language: browserLang,
+					location: location.trim() || undefined, // For BountyBoard jobs
 				}),
 			});
 
@@ -86,22 +88,32 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 				Search freelance platforms for jobs, plus discover BountyBoard opportunities - service ideas for local businesses based on their pain points.
 			</p>
 
-			{/* Search Input */}
-			<div className="flex gap-3 mb-6">
+			{/* Search Inputs */}
+			<div className="flex flex-col md:flex-row gap-3 mb-6">
 				<div className="flex-1 relative">
 					<input
 						type="text"
 						value={query}
 						onChange={(e) => setQuery(e.target.value)}
 						onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-						placeholder="Search for gigs... (e.g., 'web design', 'SEO', 'booking system', 'social media')"
+						placeholder="Service type (e.g., 'web design', 'SEO', 'booking system')"
+						className="w-full px-5 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-amber-500/50 focus:bg-white/[0.07] transition-all"
+					/>
+				</div>
+				<div className="md:w-64 relative">
+					<input
+						type="text"
+						value={location}
+						onChange={(e) => setLocation(e.target.value)}
+						onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+						placeholder="Location (e.g., 'Austin, TX')"
 						className="w-full px-5 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-amber-500/50 focus:bg-white/[0.07] transition-all"
 					/>
 				</div>
 				<button
 					onClick={handleSearch}
 					disabled={isSearching || !query.trim()}
-					className="px-6 py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 text-black font-semibold rounded-xl hover:from-amber-400 hover:to-orange-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+					className="px-6 py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 text-black font-semibold rounded-xl hover:from-amber-400 hover:to-orange-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
 				>
 					{isSearching ? (
 						<span className="flex items-center gap-2">
@@ -128,6 +140,10 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 					)}
 				</button>
 			</div>
+
+			<p className="text-white/30 text-xs mb-4">
+				Add a location to find BountyBoard Jobs - real local businesses that need your services
+			</p>
 
 			{/* Source Pills - Show BountyBoard first */}
 			<div className="flex flex-wrap gap-2 mb-6">

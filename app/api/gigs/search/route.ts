@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
 		}
 
 		const body = await request.json();
-		const { query, sources, companyId, options, language } = body as {
+		const { query, sources, companyId, options, language, location } = body as {
 			query: string;
 			sources?: GigSource[];
 			companyId: string;
@@ -22,6 +22,7 @@ export async function POST(request: NextRequest) {
 				maxBudget?: number;
 			};
 			language?: string;
+			location?: string; // For BountyBoard jobs - city/region
 		};
 
 		if (!query || !companyId) {
@@ -41,6 +42,7 @@ export async function POST(request: NextRequest) {
 				minBudget: options?.minBudget,
 				maxBudget: options?.maxBudget,
 				language: language || "en",
+				location: location, // Pass location for BountyBoard jobs
 			}
 		);
 
