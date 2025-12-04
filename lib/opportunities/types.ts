@@ -354,6 +354,7 @@ export const FEATURE_DETECTION_PATTERNS: Record<FeatureType, {
 		elements: ["social-links", "social-icons"],
 	},
 	google_analytics: {
+		keywords: [], // Detected via script tags
 		scripts: ["google-analytics", "gtag", "googletagmanager"],
 	},
 	schema_markup: {
