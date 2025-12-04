@@ -57,6 +57,9 @@ export default async function DashboardPage({
 						<TabLink href={`/dashboard/${companyId}`} active>
 							Find Gigs
 						</TabLink>
+						<TabLink href={`/dashboard/${companyId}/opportunities`}>
+							Find Opportunities
+						</TabLink>
 						<TabLink href={`/dashboard/${companyId}/curated`}>
 							Curated ({approvedCount})
 						</TabLink>

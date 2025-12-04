@@ -52,6 +52,9 @@ export default async function CuratedPage({
 				<div className="max-w-7xl mx-auto px-6">
 					<nav className="flex gap-1">
 						<TabLink href={`/dashboard/${companyId}`}>Find Gigs</TabLink>
+						<TabLink href={`/dashboard/${companyId}/opportunities`}>
+							Find Opportunities
+						</TabLink>
 						<TabLink href={`/dashboard/${companyId}/curated`} active>
 							Curated ({approvedGigs.length})
 						</TabLink>
