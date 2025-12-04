@@ -111,22 +111,19 @@ function CuratedGigCard({
 	return (
 		<div className="bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/[0.07] transition-all">
 			<div className="flex items-center gap-4">
-				{/* Source Icon */}
-				<div
-					className={`w-10 h-10 rounded-lg ${source.color} flex items-center justify-center text-lg shrink-0`}
-				>
-					{source.icon}
-				</div>
-
 				{/* Content */}
 				<div className="flex-1 min-w-0">
 					<div className="flex items-center gap-2 mb-1">
+						<span
+							className={`px-2.5 py-0.5 rounded text-xs font-medium ${source.color} text-white`}
+						>
+							{source.name}
+						</span>
 						<span
 							className={`px-2 py-0.5 rounded text-xs font-medium ${statusColors[status]}`}
 						>
 							{statusLabels[status]}
 						</span>
-						<span className="text-xs text-white/30">{source.name}</span>
 					</div>
 					<h4 className="text-white font-medium truncate">{gig.title}</h4>
 					<p className="text-sm text-white/40 truncate">{gig.description}</p>

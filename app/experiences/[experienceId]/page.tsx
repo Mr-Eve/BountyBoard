@@ -91,7 +91,7 @@ export default async function ExperiencePage({
 									key={source}
 									source={source}
 									label={info.name}
-									icon={info.icon}
+									color={info.color}
 									active={filterSource === source}
 									experienceId={experienceId}
 								/>
@@ -121,13 +121,13 @@ export default async function ExperiencePage({
 function SourcePill({
 	source,
 	label,
-	icon,
+	color,
 	active,
 	experienceId,
 }: {
 	source: string;
 	label: string;
-	icon?: string;
+	color?: string;
 	active: boolean;
 	experienceId: string;
 }) {
@@ -142,10 +142,11 @@ function SourcePill({
 			className={`shrink-0 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
 				active
 					? "bg-gradient-to-r from-amber-500 to-orange-500 text-black"
+					: color
+					? `${color} text-white hover:opacity-80`
 					: "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"
 			}`}
 		>
-			{icon && <span className="mr-1">{icon}</span>}
 			{label}
 		</a>
 	);
@@ -163,14 +164,11 @@ function GigCard({ curatedGig }: { curatedGig: CuratedGig }) {
 			<div className="relative">
 				{/* Header */}
 				<div className="flex items-start justify-between gap-4 mb-4">
-					<div className="flex items-center gap-2">
-						<span
-							className={`w-8 h-8 rounded-lg ${source.color} flex items-center justify-center text-sm`}
-						>
-							{source.icon}
-						</span>
-						<span className="text-white/50 text-sm">{source.name}</span>
-					</div>
+					<span
+						className={`px-3 py-1 rounded-lg ${source.color} text-white text-xs font-medium`}
+					>
+						{source.name}
+					</span>
 					{gig.clientInfo?.rating && (
 						<span className="px-2 py-1 bg-amber-500/20 text-amber-400 rounded-lg text-xs font-medium">
 							{gig.clientInfo.rating} stars

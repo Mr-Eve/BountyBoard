@@ -69,71 +69,60 @@ export interface ScrapeResult {
 // Source display info
 export const GIG_SOURCE_INFO: Record<
 	GigSource,
-	{ name: string; icon: string; color: string; baseUrl: string }
+	{ name: string; color: string; baseUrl: string }
 > = {
 	upwork: {
 		name: "Upwork",
-		icon: "U",
 		color: "bg-green-600",
 		baseUrl: "https://www.upwork.com",
 	},
 	freelancer: {
 		name: "Freelancer",
-		icon: "F",
 		color: "bg-blue-600",
 		baseUrl: "https://www.freelancer.com",
 	},
 	fiverr: {
 		name: "Fiverr",
-		icon: "5",
 		color: "bg-emerald-500",
 		baseUrl: "https://www.fiverr.com",
 	},
 	toptal: {
 		name: "Toptal",
-		icon: "T",
 		color: "bg-indigo-600",
 		baseUrl: "https://www.toptal.com",
 	},
 	guru: {
 		name: "Guru",
-		icon: "G",
 		color: "bg-sky-600",
 		baseUrl: "https://www.guru.com",
 	},
 	peopleperhour: {
 		name: "PeoplePerHour",
-		icon: "P",
 		color: "bg-orange-500",
 		baseUrl: "https://www.peopleperhour.com",
 	},
 	remoteok: {
 		name: "RemoteOK",
-		icon: "R",
 		color: "bg-violet-600",
 		baseUrl: "https://remoteok.com",
 	},
 	weworkremotely: {
 		name: "We Work Remotely",
-		icon: "W",
 		color: "bg-yellow-600",
 		baseUrl: "https://weworkremotely.com",
 	},
 	linkedin: {
 		name: "LinkedIn",
-		icon: "in",
 		color: "bg-blue-700",
 		baseUrl: "https://www.linkedin.com/jobs",
 	},
 	indeed: {
 		name: "Indeed",
-		icon: "I",
 		color: "bg-purple-600",
 		baseUrl: "https://www.indeed.com",
 	},
 	manual: {
 		name: "Manual",
-		icon: "M",
 		color: "bg-gray-600",
 		baseUrl: "",
 	},

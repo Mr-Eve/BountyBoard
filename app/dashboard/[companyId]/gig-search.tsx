@@ -130,9 +130,9 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 				{Object.entries(SOURCE_INFO).slice(0, 6).map(([key, info]) => (
 					<span
 						key={key}
-						className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white/50"
+						className={`px-3 py-1.5 ${info.color} rounded-lg text-xs text-white font-medium`}
 					>
-						{info.icon} {info.name}
+						{info.name}
 					</span>
 				))}
 			</div>
@@ -195,12 +195,12 @@ function GigResultCard({
 		<div className="bg-white/5 border border-white/10 rounded-xl p-5 hover:bg-white/[0.07] transition-all">
 			<div className="flex items-start gap-4">
 				<div className="flex-1 min-w-0">
-					{/* Source & Title */}
+					{/* Source Tag */}
 					<div className="flex items-center gap-2 mb-2">
 						<span
-							className={`px-2 py-1 rounded-md text-xs font-medium ${source.color} text-white`}
+							className={`px-2.5 py-1 rounded-md text-xs font-medium ${source.color} text-white`}
 						>
-							{source.icon} {source.name}
+							{source.name}
 						</span>
 						{gig.clientInfo?.rating && (
 							<span className="text-xs text-white/40">
