@@ -35,8 +35,8 @@ export default async function DashboardPage({
 					<div className="flex items-center justify-between">
 						<div>
 							<div className="flex items-center gap-3 mb-1">
-								<div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-xl">
-									🏆
+								<div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-sm font-bold text-black">
+									BB
 								</div>
 								<h1 className="text-2xl font-bold text-white">
 									Bounty Board
@@ -55,13 +55,13 @@ export default async function DashboardPage({
 				<div className="max-w-7xl mx-auto px-6">
 					<nav className="flex gap-1">
 						<TabLink href={`/dashboard/${companyId}`} active>
-							🔍 Find Gigs
+							Find Gigs
 						</TabLink>
 						<TabLink href={`/dashboard/${companyId}/curated`}>
-							📋 Curated ({approvedCount})
+							Curated ({approvedCount})
 						</TabLink>
 						<TabLink href={`/dashboard/${companyId}/pending`}>
-							⏳ Pending ({pendingCount})
+							Pending ({pendingCount})
 						</TabLink>
 					</nav>
 				</div>
@@ -73,25 +73,21 @@ export default async function DashboardPage({
 					<StatCard
 						label="Total Curated"
 						value={curatedGigs.length}
-						icon="📚"
 						color="from-white/10 to-white/5"
 					/>
 					<StatCard
 						label="Approved"
 						value={approvedCount}
-						icon="✅"
 						color="from-emerald-500/20 to-emerald-500/5"
 					/>
 					<StatCard
 						label="Pending Review"
 						value={pendingCount}
-						icon="⏳"
 						color="from-amber-500/20 to-amber-500/5"
 					/>
 					<StatCard
 						label="Sources"
 						value={8}
-						icon="🌐"
 						color="from-blue-500/20 to-blue-500/5"
 					/>
 				</div>
@@ -140,22 +136,17 @@ function TabLink({
 function StatCard({
 	label,
 	value,
-	icon,
 	color,
 }: {
 	label: string;
 	value: number;
-	icon: string;
 	color: string;
 }) {
 	return (
 		<div
 			className={`bg-gradient-to-br ${color} border border-white/10 rounded-2xl p-5`}
 		>
-			<div className="flex items-center gap-2 mb-2">
-				<span className="text-lg">{icon}</span>
-				<p className="text-white/50 text-sm">{label}</p>
-			</div>
+			<p className="text-white/50 text-sm mb-2">{label}</p>
 			<p className="text-3xl font-bold text-white">{value}</p>
 		</div>
 	);

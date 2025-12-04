@@ -54,14 +54,14 @@ export function CuratedGigsSection({
 		<div>
 			<div className="flex items-center justify-between mb-4">
 				<h2 className="text-xl font-semibold text-white">
-					📋 Recently Curated Gigs
+					Recently Curated Gigs
 				</h2>
 				{showViewAll && (
 					<Link
 						href={`/dashboard/${companyId}/curated`}
 						className="text-sm text-amber-400 hover:text-amber-300"
 					>
-						View all →
+						View all
 					</Link>
 				)}
 			</div>
@@ -102,10 +102,10 @@ function CuratedGigCard({
 	};
 
 	const statusLabels = {
-		pending: "⏳ Pending",
-		approved: "✅ Approved",
-		rejected: "❌ Rejected",
-		hidden: "👁️ Hidden",
+		pending: "Pending",
+		approved: "Approved",
+		rejected: "Rejected",
+		hidden: "Hidden",
 	};
 
 	return (
@@ -146,18 +146,18 @@ function CuratedGigCard({
 							<button
 								onClick={() => onUpdateStatus("approved")}
 								disabled={isUpdating}
-								className="p-2 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 rounded-lg transition-all disabled:opacity-50"
+								className="px-3 py-2 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 rounded-lg transition-all disabled:opacity-50 text-xs font-medium"
 								title="Approve"
 							>
-								✓
+								Approve
 							</button>
 							<button
 								onClick={() => onUpdateStatus("rejected")}
 								disabled={isUpdating}
-								className="p-2 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-lg transition-all disabled:opacity-50"
+								className="px-3 py-2 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-lg transition-all disabled:opacity-50 text-xs font-medium"
 								title="Reject"
 							>
-								✕
+								Reject
 							</button>
 						</>
 					)}
@@ -165,30 +165,30 @@ function CuratedGigCard({
 						<button
 							onClick={() => onUpdateStatus("hidden")}
 							disabled={isUpdating}
-							className="p-2 bg-white/10 text-white/50 hover:bg-white/20 rounded-lg transition-all disabled:opacity-50"
+							className="px-3 py-2 bg-white/10 text-white/50 hover:bg-white/20 rounded-lg transition-all disabled:opacity-50 text-xs font-medium"
 							title="Hide"
 						>
-							👁️
+							Hide
 						</button>
 					)}
 					{(status === "rejected" || status === "hidden") && (
 						<button
 							onClick={() => onUpdateStatus("approved")}
 							disabled={isUpdating}
-							className="p-2 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 rounded-lg transition-all disabled:opacity-50"
+							className="px-3 py-2 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 rounded-lg transition-all disabled:opacity-50 text-xs font-medium"
 							title="Approve"
 						>
-							✓
+							Approve
 						</button>
 					)}
 					<a
 						href={gig.sourceUrl}
 						target="_blank"
 						rel="noopener noreferrer"
-						className="p-2 bg-white/5 text-white/50 hover:text-white rounded-lg transition-all"
+						className="px-3 py-2 bg-white/5 text-white/50 hover:text-white rounded-lg transition-all text-xs font-medium"
 						title="View original"
 					>
-						↗
+						View
 					</a>
 				</div>
 			</div>

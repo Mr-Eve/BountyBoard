@@ -18,7 +18,7 @@ export default function DiscoverPage() {
 						when people install your app.
 					</p>
 					<p className="text-sm text-gray-400 max-w-2xl mx-auto">
-						💡 <strong>Tip:</strong> Clearly explain your app's value
+						<strong>Tip:</strong> Clearly explain your app's value
 						proposition and how it helps creators make money or grow their
 						communities.
 					</p>

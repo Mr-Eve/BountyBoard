@@ -76,7 +76,7 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 	return (
 		<div>
 			<h2 className="text-xl font-semibold text-white mb-4">
-				🔍 Search for Gigs
+				Search for Gigs
 			</h2>
 			<p className="text-white/50 text-sm mb-6">
 				Search across multiple freelance platforms to find opportunities for your community members.
@@ -204,7 +204,7 @@ function GigResultCard({
 						</span>
 						{gig.clientInfo?.rating && (
 							<span className="text-xs text-white/40">
-								⭐ {gig.clientInfo.rating}
+								{gig.clientInfo.rating} stars
 							</span>
 						)}
 					</div>
@@ -241,7 +241,7 @@ function GigResultCard({
 						<div className="flex items-center gap-3 text-xs text-white/40">
 							{gig.clientInfo.name && <span>{gig.clientInfo.name}</span>}
 							{gig.clientInfo.location && (
-								<span>📍 {gig.clientInfo.location}</span>
+								<span>{gig.clientInfo.location}</span>
 							)}
 							{gig.clientInfo.jobsPosted && (
 								<span>{gig.clientInfo.jobsPosted} jobs posted</span>
@@ -273,7 +273,7 @@ function GigResultCard({
 									: "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
 							}`}
 						>
-							{isAdded ? "✓ Added" : isAdding ? "Adding..." : "+ Add"}
+							{isAdded ? "Added" : isAdding ? "Adding..." : "+ Add"}
 						</button>
 						<a
 							href={gig.sourceUrl}
@@ -281,7 +281,7 @@ function GigResultCard({
 							rel="noopener noreferrer"
 							className="px-4 py-2 bg-white/5 text-white/50 hover:text-white rounded-lg text-sm transition-all"
 						>
-							View →
+							View
 						</a>
 					</div>
 				</div>

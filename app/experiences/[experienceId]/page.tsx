@@ -48,8 +48,8 @@ export default async function ExperiencePage({
 
 				<div className="relative max-w-6xl mx-auto px-6 py-12">
 					<div className="flex items-center gap-4 mb-4">
-						<div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-2xl shadow-xl shadow-amber-500/30">
-							🏆
+						<div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-2xl font-bold text-black shadow-xl shadow-amber-500/30">
+							BB
 						</div>
 						<div>
 							<h1 className="text-3xl font-bold text-white">Bounty Board</h1>
@@ -173,7 +173,7 @@ function GigCard({ curatedGig }: { curatedGig: CuratedGig }) {
 					</div>
 					{gig.clientInfo?.rating && (
 						<span className="px-2 py-1 bg-amber-500/20 text-amber-400 rounded-lg text-xs font-medium">
-							⭐ {gig.clientInfo.rating}
+							{gig.clientInfo.rating} stars
 						</span>
 					)}
 				</div>
@@ -190,7 +190,7 @@ function GigCard({ curatedGig }: { curatedGig: CuratedGig }) {
 				{notes && (
 					<div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
 						<p className="text-sm text-amber-200">
-							<span className="font-medium">💡 Note:</span> {notes}
+							<span className="font-medium">Note:</span> {notes}
 						</p>
 					</div>
 				)}
@@ -219,12 +219,12 @@ function GigCard({ curatedGig }: { curatedGig: CuratedGig }) {
 					<div className="flex items-center gap-3 text-xs text-white/40 mb-4">
 						{gig.clientInfo.name && (
 							<span className="flex items-center gap-1">
-								🏢 {gig.clientInfo.name}
+								{gig.clientInfo.name}
 							</span>
 						)}
 						{gig.clientInfo.location && (
 							<span className="flex items-center gap-1">
-								📍 {gig.clientInfo.location}
+								{gig.clientInfo.location}
 							</span>
 						)}
 					</div>
@@ -252,7 +252,7 @@ function GigCard({ curatedGig }: { curatedGig: CuratedGig }) {
 						rel="noopener noreferrer"
 						className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-amber-500 to-orange-500 text-black hover:from-amber-400 hover:to-orange-400 transition-all"
 					>
-						Apply Now →
+						Apply Now
 					</a>
 				</div>
 			</div>
@@ -263,8 +263,8 @@ function GigCard({ curatedGig }: { curatedGig: CuratedGig }) {
 function EmptyState() {
 	return (
 		<div className="text-center py-20 px-8">
-			<div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center text-4xl">
-				🔍
+			<div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center text-2xl font-bold text-white/50">
+				?
 			</div>
 			<h3 className="text-2xl font-semibold text-white mb-3">
 				No gigs available yet

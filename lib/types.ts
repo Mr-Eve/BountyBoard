@@ -38,14 +38,14 @@ export interface BountySubmission {
 // Category display info
 export const CATEGORY_INFO: Record<
 	BountyCategory,
-	{ label: string; emoji: string; color: string }
+	{ label: string; color: string }
 > = {
-	development: { label: "Development", emoji: "💻", color: "bg-blue-500" },
-	design: { label: "Design", emoji: "🎨", color: "bg-pink-500" },
-	marketing: { label: "Marketing", emoji: "📣", color: "bg-orange-500" },
-	content: { label: "Content", emoji: "✍️", color: "bg-purple-500" },
-	community: { label: "Community", emoji: "👥", color: "bg-green-500" },
-	other: { label: "Other", emoji: "📦", color: "bg-gray-500" },
+	development: { label: "Development", color: "bg-blue-500" },
+	design: { label: "Design", color: "bg-pink-500" },
+	marketing: { label: "Marketing", color: "bg-orange-500" },
+	content: { label: "Content", color: "bg-purple-500" },
+	community: { label: "Community", color: "bg-green-500" },
+	other: { label: "Other", color: "bg-gray-500" },
 };
 
 export const STATUS_INFO: Record<
