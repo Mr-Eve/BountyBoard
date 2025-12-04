@@ -143,16 +143,44 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 				<div className="space-y-4">
 					<div className="flex items-center justify-between">
 						<h3 className="text-lg font-medium text-white">
-							{results.length > 0
+							{isSearching
+								? "Loading results..."
+								: results.length > 0
 								? `Found ${results.length} gigs`
 								: "No gigs found"}
 						</h3>
-						{results.length > 0 && (
+						{results.length > 0 && !isSearching && (
 							<span className="text-sm text-white/40">
 								Click + to add to your curated list
 							</span>
 						)}
 					</div>
+
+					{isSearching && (
+						<div className="text-center py-12 bg-white/5 rounded-2xl border border-white/10">
+							<div className="flex flex-col items-center gap-3">
+								<svg className="animate-spin h-8 w-8 text-amber-400" viewBox="0 0 24 24">
+									<circle
+										className="opacity-25"
+										cx="12"
+										cy="12"
+										r="10"
+										stroke="currentColor"
+										strokeWidth="4"
+										fill="none"
+									/>
+									<path
+										className="opacity-75"
+										fill="currentColor"
+										d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+									/>
+								</svg>
+								<p className="text-white/50">
+									Searching across job platforms...
+								</p>
+							</div>
+						</div>
+					)}
 
 					{results.length === 0 && !isSearching && (
 						<div className="text-center py-12 bg-white/5 rounded-2xl border border-white/10">
@@ -162,7 +190,7 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 						</div>
 					)}
 
-					<div className="grid gap-4">
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						{results.map((gig) => (
 							<GigResultCard
 								key={gig.id}
@@ -193,100 +221,80 @@ function GigResultCard({
 	const source = SOURCE_INFO[gig.source];
 
 	return (
-		<div className="bg-white/5 border border-white/10 rounded-xl p-5 hover:bg-white/[0.07] transition-all">
-			<div className="flex items-start gap-4">
-				<div className="flex-1 min-w-0">
-					{/* Source Tag */}
-					<div className="flex items-center gap-2 mb-2">
+		<div className="bg-white/5 border border-white/10 rounded-xl p-5 hover:bg-white/[0.07] transition-all flex flex-col">
+			{/* Header - Source & Budget */}
+			<div className="flex items-center justify-between gap-2 mb-3">
+				<span
+					style={{ backgroundColor: source.color }}
+					className="px-2.5 py-1 rounded-md text-xs font-medium text-white"
+				>
+					{source.name}
+				</span>
+				<p className="text-lg font-bold text-amber-400">
+					{formatBudget(gig.budget)}
+				</p>
+			</div>
+
+			{/* Title */}
+			<h4 className="text-base font-medium text-white mb-2 line-clamp-2">
+				{gig.title}
+			</h4>
+
+			{/* Description */}
+			<p className="text-sm text-white/50 line-clamp-2 mb-3 flex-grow">
+				{gig.description}
+			</p>
+
+			{/* Skills */}
+			{gig.skills.length > 0 && (
+				<div className="flex flex-wrap gap-1.5 mb-3">
+					{gig.skills.slice(0, 4).map((skill) => (
 						<span
-							style={{ backgroundColor: source.color }}
-							className="px-2.5 py-1 rounded-md text-xs font-medium text-white"
+							key={skill}
+							className="px-2 py-0.5 bg-white/5 rounded text-xs text-white/50"
 						>
-							{source.name}
+							{skill}
 						</span>
-						{gig.clientInfo?.rating && (
-							<span className="text-xs text-white/40">
-								{gig.clientInfo.rating} stars
-							</span>
-						)}
-					</div>
-
-					<h4 className="text-lg font-medium text-white mb-2 line-clamp-1">
-						{gig.title}
-					</h4>
-
-					<p className="text-sm text-white/50 line-clamp-2 mb-3">
-						{gig.description}
-					</p>
-
-					{/* Skills */}
-					{gig.skills.length > 0 && (
-						<div className="flex flex-wrap gap-1.5 mb-3">
-							{gig.skills.slice(0, 5).map((skill) => (
-								<span
-									key={skill}
-									className="px-2 py-0.5 bg-white/5 rounded text-xs text-white/50"
-								>
-									{skill}
-								</span>
-							))}
-							{gig.skills.length > 5 && (
-								<span className="px-2 py-0.5 text-xs text-white/30">
-									+{gig.skills.length - 5} more
-								</span>
-							)}
-						</div>
-					)}
-
-					{/* Client Info */}
-					{gig.clientInfo && (
-						<div className="flex items-center gap-3 text-xs text-white/40">
-							{gig.clientInfo.name && <span>{gig.clientInfo.name}</span>}
-							{gig.clientInfo.location && (
-								<span>{gig.clientInfo.location}</span>
-							)}
-							{gig.clientInfo.jobsPosted && (
-								<span>{gig.clientInfo.jobsPosted} jobs posted</span>
-							)}
-						</div>
+					))}
+					{gig.skills.length > 4 && (
+						<span className="px-2 py-0.5 text-xs text-white/30">
+							+{gig.skills.length - 4} more
+						</span>
 					)}
 				</div>
+			)}
 
-				{/* Right Side - Budget & Actions */}
-				<div className="shrink-0 text-right">
-					<p className="text-xl font-bold text-amber-400 mb-1">
-						{formatBudget(gig.budget)}
-					</p>
-					{gig.postedAt && (
-						<p className="text-xs text-white/40 mb-3">
-							{formatTimeAgo(gig.postedAt)}
-						</p>
-					)}
+			{/* Client Info & Posted */}
+			<div className="flex items-center justify-between text-xs text-white/40 mb-4">
+				<span className="truncate">
+					{gig.clientInfo?.name || gig.clientInfo?.location || ""}
+				</span>
+				{gig.postedAt && <span>{formatTimeAgo(gig.postedAt)}</span>}
+			</div>
 
-					<div className="flex flex-col gap-2">
-						<button
-							onClick={onAdd}
-							disabled={isAdding || isAdded}
-							className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-								isAdded
-									? "bg-emerald-500/20 text-emerald-400 cursor-default"
-									: isAdding
-									? "bg-white/10 text-white/50 cursor-wait"
-									: "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
-							}`}
-						>
-							{isAdded ? "Added" : isAdding ? "Adding..." : "+ Add"}
-						</button>
-						<a
-							href={gig.sourceUrl}
-							target="_blank"
-							rel="noopener noreferrer"
-							className="px-4 py-2 bg-white/5 text-white/50 hover:text-white rounded-lg text-sm transition-all"
-						>
-							View
-						</a>
-					</div>
-				</div>
+			{/* Actions */}
+			<div className="flex gap-2 mt-auto">
+				<button
+					onClick={onAdd}
+					disabled={isAdding || isAdded}
+					className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+						isAdded
+							? "bg-emerald-500/20 text-emerald-400 cursor-default"
+							: isAdding
+							? "bg-white/10 text-white/50 cursor-wait"
+							: "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
+					}`}
+				>
+					{isAdded ? "Added" : isAdding ? "Adding..." : "+ Add"}
+				</button>
+				<a
+					href={gig.sourceUrl}
+					target="_blank"
+					rel="noopener noreferrer"
+					className="px-4 py-2 bg-white/5 text-white/50 hover:text-white rounded-lg text-sm transition-all text-center"
+				>
+					View
+				</a>
 			</div>
 		</div>
 	);
