@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-	title: "Whop App",
-	description: "My Whop App",
+	title: "Bounty Board",
+	description: "Curated job boards for community leaders and their members",
 };
 
 export default function RootLayout({

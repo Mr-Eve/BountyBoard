@@ -1,6 +1,6 @@
 {
-	"name": "whop-nextjs-app-template",
-	"version": "0.2.0",
+	"name": "bounty-board",
+	"version": "0.1.0",
 	"private": true,
 	"scripts": {
 		"dev": "whop-proxy --command 'next dev --turbopack'",
