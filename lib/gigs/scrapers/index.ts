@@ -133,6 +133,8 @@ function getSourceUrl(source: GigSource, sourceId: string): string {
 		weworkremotely: "https://weworkremotely.com/jobs/",
 		linkedin: "https://www.linkedin.com/jobs/view/",
 		indeed: "https://www.indeed.com/viewjob?jk=",
+		arbeitnow: "https://www.arbeitnow.com/jobs/",
+		himalayas: "https://himalayas.app/jobs/",
 		manual: "",
 	};
 	return `${baseUrls[source]}${sourceId}`;
