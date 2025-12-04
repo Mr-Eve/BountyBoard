@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
 		}
 
 		const body = await request.json();
-		const { query, sources, companyId, options } = body as {
+		const { query, sources, companyId, options, language } = body as {
 			query: string;
 			sources?: GigSource[];
 			companyId: string;
@@ -21,6 +21,7 @@ export async function POST(request: NextRequest) {
 				minBudget?: number;
 				maxBudget?: number;
 			};
+			language?: string;
 		};
 
 		if (!query || !companyId) {
@@ -31,6 +32,7 @@ export async function POST(request: NextRequest) {
 		}
 
 		// Search for gigs - default to free API sources
+		// Default to English if no language specified
 		const results = await searchGigs(
 			query,
 			sources || ["remoteok", "arbeitnow", "himalayas"],
@@ -38,6 +40,7 @@ export async function POST(request: NextRequest) {
 				limit: options?.limit || 20,
 				minBudget: options?.minBudget,
 				maxBudget: options?.maxBudget,
+				language: language || "en",
 			}
 		);
 

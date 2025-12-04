@@ -3,7 +3,7 @@
 // Free tier: 500 requests/month
 
 import type { Scraper, SearchOptions } from "./base";
-import { generateGigId } from "./base";
+import { generateGigId, isInLanguage } from "./base";
 import type { ScrapedGig, ScrapeResult, GigSource } from "./types";
 
 interface JSearchJob {
@@ -117,6 +117,13 @@ export class JSearchScraper implements Scraper {
 			// Filter by requested source if specific
 			if (this.source !== "indeed") {
 				gigs = gigs.filter(g => g.source === this.source);
+			}
+
+			// Filter by language if specified
+			if (options?.language) {
+				gigs = gigs.filter((gig) => 
+					isInLanguage(`${gig.title} ${gig.description}`, options.language!)
+				);
 			}
 
 			// Apply limit

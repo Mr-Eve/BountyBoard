@@ -1,7 +1,7 @@
 // Arbeitnow Scraper - Free public API for job listings
 
 import type { Scraper, SearchOptions } from "./base";
-import { generateGigId } from "./base";
+import { generateGigId, isInLanguage } from "./base";
 import type { ScrapedGig, ScrapeResult } from "./types";
 
 interface ArbeitnowJob {
@@ -68,6 +68,13 @@ export class ArbeitnowScraper implements Scraper {
 				},
 				scrapedAt: new Date().toISOString(),
 			}));
+
+			// Filter by language if specified
+			if (options?.language) {
+				gigs = gigs.filter((gig) => 
+					isInLanguage(`${gig.title} ${gig.description}`, options.language!)
+				);
+			}
 
 			// Apply limit
 			if (options?.limit) {

@@ -23,6 +23,9 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 		setHasSearched(true);
 
 		try {
+			// Detect user's browser language (e.g., "en-US" -> "en")
+			const browserLang = navigator.language?.split("-")[0] || "en";
+			
 			const response = await fetch("/api/gigs/search", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
@@ -30,7 +33,8 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 					query: query.trim(),
 					companyId,
 					sources: ["remoteok", "arbeitnow", "himalayas"],
-					options: { limit: 30 },
+					options: { limit: 50 }, // Request more since some will be filtered
+					language: browserLang,
 				}),
 			});
 
