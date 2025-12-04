@@ -1,18 +1,17 @@
 import { headers } from "next/headers";
 import { whopsdk } from "@/lib/whop-sdk";
-import { getBountiesByCompany, seedDemoData } from "@/lib/bounties";
-import { CATEGORY_INFO, STATUS_INFO } from "@/lib/types";
-import type { Bounty, BountyCategory } from "@/lib/types";
+import { getApprovedGigs, SOURCE_INFO, type CuratedGig } from "@/lib/scrapers";
+import { formatBudget } from "@/lib/scrapers/base";
 
 export default async function ExperiencePage({
 	params,
 	searchParams,
 }: {
 	params: Promise<{ experienceId: string }>;
-	searchParams: Promise<{ category?: string }>;
+	searchParams: Promise<{ source?: string }>;
 }) {
 	const { experienceId } = await params;
-	const { category: filterCategory } = await searchParams;
+	const { source: filterSource } = await searchParams;
 
 	// Verify user is logged in
 	const { userId } = await whopsdk.verifyUserToken(await headers());
@@ -22,29 +21,23 @@ export default async function ExperiencePage({
 	]);
 
 	// Get the company ID from the experience
-	// experience.company can be a Company object or string ID
-	const companyId = typeof experience.company === "string" 
-		? experience.company 
-		: experience.company.id;
+	const companyId =
+		typeof experience.company === "string"
+			? experience.company
+			: experience.company.id;
 
-	// Seed demo data for testing
-	seedDemoData(companyId);
+	// Get approved gigs for members
+	let gigs = await getApprovedGigs(companyId);
 
-	// Get bounties
-	let bounties = await getBountiesByCompany(companyId);
-
-	// Filter by category if specified
-	if (filterCategory && filterCategory !== "all") {
-		bounties = bounties.filter((b) => b.category === filterCategory);
+	// Filter by source if specified
+	if (filterSource && filterSource !== "all") {
+		gigs = gigs.filter((g) => g.gig.source === filterSource);
 	}
 
-	// Only show open and in_progress bounties to members
-	bounties = bounties.filter(
-		(b) => b.status === "open" || b.status === "in_progress"
-	);
-
 	const displayName = user.name || `@${user.username}`;
-	const openCount = bounties.filter((b) => b.status === "open").length;
+
+	// Get unique sources for filtering
+	const availableSources = [...new Set(gigs.map((g) => g.gig.source))];
 
 	return (
 		<div className="min-h-screen bg-[#0a0a0b]">
@@ -59,26 +52,22 @@ export default async function ExperiencePage({
 							🏆
 						</div>
 						<div>
-							<h1 className="text-3xl font-bold text-white">
-								Bounty Board
-							</h1>
-							<p className="text-white/50">
-								Welcome back, {displayName}
-							</p>
+							<h1 className="text-3xl font-bold text-white">Bounty Board</h1>
+							<p className="text-white/50">Welcome back, {displayName}</p>
 						</div>
 					</div>
 
 					<p className="text-white/70 text-lg max-w-2xl mb-6">
-						Complete bounties to earn rewards and contribute to the
-						community. Browse available tasks below.
+						Hand-picked freelance opportunities curated just for this community.
+						Find your next gig and start earning.
 					</p>
 
 					<div className="flex items-center gap-6">
 						<div className="flex items-center gap-2">
 							<div className="w-3 h-3 rounded-full bg-emerald-400 animate-pulse" />
 							<span className="text-white/70">
-								<strong className="text-white">{openCount}</strong> bounties
-								available
+								<strong className="text-white">{gigs.length}</strong> curated
+								opportunities
 							</span>
 						</div>
 					</div>
@@ -86,37 +75,40 @@ export default async function ExperiencePage({
 			</header>
 
 			<main className="max-w-6xl mx-auto px-6 py-8">
-				{/* Category Filter */}
-				<div className="flex items-center gap-2 mb-8 overflow-x-auto pb-2">
-					<CategoryPill
-						category="all"
-						label="All"
-						emoji="✨"
-						active={!filterCategory || filterCategory === "all"}
-						experienceId={experienceId}
-					/>
-					{Object.entries(CATEGORY_INFO).map(([key, info]) => (
-						<CategoryPill
-							key={key}
-							category={key}
-							label={info.label}
-							emoji={info.emoji}
-							active={filterCategory === key}
+				{/* Source Filter */}
+				{availableSources.length > 1 && (
+					<div className="flex items-center gap-2 mb-8 overflow-x-auto pb-2">
+						<SourcePill
+							source="all"
+							label="All Sources"
+							active={!filterSource || filterSource === "all"}
 							experienceId={experienceId}
 						/>
-					))}
-				</div>
+						{availableSources.map((source) => {
+							const info = SOURCE_INFO[source];
+							return (
+								<SourcePill
+									key={source}
+									source={source}
+									label={info.name}
+									icon={info.icon}
+									active={filterSource === source}
+									experienceId={experienceId}
+								/>
+							);
+						})}
+					</div>
+				)}
 
-				{/* Bounties Grid */}
-				{bounties.length === 0 ? (
+				{/* Gigs Grid */}
+				{gigs.length === 0 ? (
 					<EmptyState />
 				) : (
 					<div className="grid md:grid-cols-2 gap-5">
-						{bounties.map((bounty) => (
-							<BountyCard
-								key={bounty.id}
-								bounty={bounty}
-								experienceId={experienceId}
+						{gigs.map((curatedGig) => (
+							<GigCard
+								key={curatedGig.id}
+								curatedGig={curatedGig}
 							/>
 						))}
 					</div>
@@ -126,23 +118,23 @@ export default async function ExperiencePage({
 	);
 }
 
-function CategoryPill({
-	category,
+function SourcePill({
+	source,
 	label,
-	emoji,
+	icon,
 	active,
 	experienceId,
 }: {
-	category: string;
+	source: string;
 	label: string;
-	emoji: string;
+	icon?: string;
 	active: boolean;
 	experienceId: string;
 }) {
 	const href =
-		category === "all"
+		source === "all"
 			? `/experiences/${experienceId}`
-			: `/experiences/${experienceId}?category=${category}`;
+			: `/experiences/${experienceId}?source=${source}`;
 
 	return (
 		<a
@@ -153,21 +145,15 @@ function CategoryPill({
 					: "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"
 			}`}
 		>
-			{emoji} {label}
+			{icon && <span className="mr-1">{icon}</span>}
+			{label}
 		</a>
 	);
 }
 
-function BountyCard({
-	bounty,
-	experienceId,
-}: {
-	bounty: Bounty;
-	experienceId: string;
-}) {
-	const category = CATEGORY_INFO[bounty.category];
-	const status = STATUS_INFO[bounty.status];
-	const isOpen = bounty.status === "open";
+function GigCard({ curatedGig }: { curatedGig: CuratedGig }) {
+	const { gig, customReward, notes } = curatedGig;
+	const source = SOURCE_INFO[gig.source];
 
 	return (
 		<div className="group relative bg-white/5 hover:bg-white/[0.07] border border-white/10 hover:border-amber-500/30 rounded-2xl p-6 transition-all">
@@ -179,43 +165,66 @@ function BountyCard({
 				<div className="flex items-start justify-between gap-4 mb-4">
 					<div className="flex items-center gap-2">
 						<span
-							className={`w-8 h-8 rounded-lg ${category.color} flex items-center justify-center text-sm`}
+							className={`w-8 h-8 rounded-lg ${source.color} flex items-center justify-center text-sm`}
 						>
-							{category.emoji}
+							{source.icon}
 						</span>
-						<span className="text-white/50 text-sm">{category.label}</span>
+						<span className="text-white/50 text-sm">{source.name}</span>
 					</div>
-					<span
-						className={`px-2.5 py-1 rounded-lg text-xs font-medium ${
-							isOpen ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400"
-						}`}
-					>
-						{status.label}
-					</span>
+					{gig.clientInfo?.rating && (
+						<span className="px-2 py-1 bg-amber-500/20 text-amber-400 rounded-lg text-xs font-medium">
+							⭐ {gig.clientInfo.rating}
+						</span>
+					)}
 				</div>
 
 				{/* Content */}
 				<h3 className="text-xl font-semibold text-white mb-2 group-hover:text-amber-200 transition-colors">
-					{bounty.title}
+					{gig.title}
 				</h3>
 				<p className="text-white/50 text-sm line-clamp-2 mb-4">
-					{bounty.description}
+					{gig.description}
 				</p>
 
-				{/* Requirements preview */}
-				{bounty.requirements && bounty.requirements.length > 0 && (
+				{/* Leader's Notes */}
+				{notes && (
+					<div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+						<p className="text-sm text-amber-200">
+							<span className="font-medium">💡 Note:</span> {notes}
+						</p>
+					</div>
+				)}
+
+				{/* Skills */}
+				{gig.skills.length > 0 && (
 					<div className="flex flex-wrap gap-2 mb-4">
-						{bounty.requirements.slice(0, 2).map((req, i) => (
+						{gig.skills.slice(0, 4).map((skill) => (
 							<span
-								key={i}
+								key={skill}
 								className="px-2 py-1 text-xs bg-white/5 text-white/50 rounded-md"
 							>
-								{req}
+								{skill}
 							</span>
 						))}
-						{bounty.requirements.length > 2 && (
+						{gig.skills.length > 4 && (
 							<span className="px-2 py-1 text-xs bg-white/5 text-white/40 rounded-md">
-								+{bounty.requirements.length - 2} more
+								+{gig.skills.length - 4} more
+							</span>
+						)}
+					</div>
+				)}
+
+				{/* Client Info */}
+				{gig.clientInfo && (
+					<div className="flex items-center gap-3 text-xs text-white/40 mb-4">
+						{gig.clientInfo.name && (
+							<span className="flex items-center gap-1">
+								🏢 {gig.clientInfo.name}
+							</span>
+						)}
+						{gig.clientInfo.location && (
+							<span className="flex items-center gap-1">
+								📍 {gig.clientInfo.location}
 							</span>
 						)}
 					</div>
@@ -225,28 +234,25 @@ function BountyCard({
 				<div className="flex items-center justify-between pt-4 border-t border-white/5">
 					<div>
 						<p className="text-2xl font-bold text-amber-400">
-							{bounty.reward}
+							{customReward || formatBudget(gig.budget)}
 						</p>
-						{bounty.deadline && (
+						{gig.postedAt && (
 							<p className="text-xs text-white/40">
-								Due{" "}
-								{new Date(bounty.deadline).toLocaleDateString("en-US", {
+								Posted{" "}
+								{new Date(gig.postedAt).toLocaleDateString("en-US", {
 									month: "short",
 									day: "numeric",
-									year: "numeric",
 								})}
 							</p>
 						)}
 					</div>
 					<a
-						href={`/experiences/${experienceId}/bounty/${bounty.id}`}
-						className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-							isOpen
-								? "bg-gradient-to-r from-amber-500 to-orange-500 text-black hover:from-amber-400 hover:to-orange-400"
-								: "bg-white/10 text-white/70"
-						}`}
+						href={gig.sourceUrl}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-amber-500 to-orange-500 text-black hover:from-amber-400 hover:to-orange-400 transition-all"
 					>
-						{isOpen ? "View & Apply" : "View Details"}
+						Apply Now →
 					</a>
 				</div>
 			</div>
@@ -261,11 +267,11 @@ function EmptyState() {
 				🔍
 			</div>
 			<h3 className="text-2xl font-semibold text-white mb-3">
-				No bounties found
+				No gigs available yet
 			</h3>
 			<p className="text-white/50 max-w-md mx-auto">
-				There are no bounties matching your filter. Try selecting a different
-				category or check back later for new opportunities.
+				The community leaders are curating opportunities for you. Check back
+				soon for hand-picked gigs!
 			</p>
 		</div>
 	);
