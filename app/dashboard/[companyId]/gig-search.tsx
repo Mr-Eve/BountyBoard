@@ -8,6 +8,9 @@ interface GigSearchSectionProps {
 	companyId: string;
 }
 
+// Available sources that can be toggled
+const AVAILABLE_SOURCES: GigSource[] = ["bountyboard", "remoteok", "arbeitnow", "himalayas"];
+
 export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 	const [query, setQuery] = useState("");
 	const [location, setLocation] = useState("");
@@ -16,6 +19,24 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 	const [hasSearched, setHasSearched] = useState(false);
 	const [addingGigs, setAddingGigs] = useState<Set<string>>(new Set());
 	const [addedGigs, setAddedGigs] = useState<Set<string>>(new Set());
+	const [enabledSources, setEnabledSources] = useState<Set<GigSource>>(
+		new Set(AVAILABLE_SOURCES)
+	);
+
+	const toggleSource = (source: GigSource) => {
+		setEnabledSources((prev) => {
+			const next = new Set(prev);
+			if (next.has(source)) {
+				// Don't allow disabling all sources
+				if (next.size > 1) {
+					next.delete(source);
+				}
+			} else {
+				next.add(source);
+			}
+			return next;
+		});
+	};
 
 	const handleSearch = async () => {
 		if (!query.trim()) return;
@@ -27,13 +48,16 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 			// Detect user's browser language (e.g., "en-US" -> "en")
 			const browserLang = navigator.language?.split("-")[0] || "en";
 			
+			// Only search enabled sources
+			const sourcesToSearch = AVAILABLE_SOURCES.filter(s => enabledSources.has(s));
+			
 			const response = await fetch("/api/gigs/search", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
 					query: query.trim(),
 					companyId,
-					sources: ["remoteok", "arbeitnow", "himalayas", "bountyboard"],
+					sources: sourcesToSearch,
 					options: { limit: 50 }, // Request more since some will be filtered
 					language: browserLang,
 					location: location.trim() || undefined, // For BountyBoard jobs
@@ -145,25 +169,35 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 				Add a location to find BountyBoard Jobs - real local businesses that need your services
 			</p>
 
-			{/* Source Pills - Show BountyBoard first */}
-			<div className="flex flex-wrap gap-2 mb-6">
-				<span
-					style={{ backgroundColor: SOURCE_INFO.bountyboard.color }}
-					className="px-3 py-1.5 rounded-lg text-xs text-white font-medium"
-				>
-					{SOURCE_INFO.bountyboard.name} Jobs
-				</span>
-				{Object.entries(SOURCE_INFO)
-					.filter(([key]) => !["bountyboard", "manual", "upwork", "freelancer", "fiverr", "toptal", "indeed", "linkedin", "weworkremotely"].includes(key))
-					.map(([key, info]) => (
-						<span
-							key={key}
-							style={{ backgroundColor: info.color }}
-							className="px-3 py-1.5 rounded-lg text-xs text-white font-medium"
-						>
-							{info.name}
-						</span>
-					))}
+			{/* Source Pills - Clickable to toggle */}
+			<div className="mb-6">
+				<p className="text-white/50 text-xs mb-2">Click to toggle sources:</p>
+				<div className="flex flex-wrap gap-2">
+					{AVAILABLE_SOURCES.map((source) => {
+						const info = SOURCE_INFO[source];
+						const isEnabled = enabledSources.has(source);
+						return (
+							<button
+								key={source}
+								onClick={() => toggleSource(source)}
+								style={{ 
+									backgroundColor: isEnabled ? info.color : "transparent",
+									borderColor: info.color,
+								}}
+								className={`px-3 py-1.5 rounded-lg text-xs font-medium border-2 transition-all ${
+									isEnabled 
+										? "text-white" 
+										: "text-white/50 hover:text-white/70"
+								}`}
+							>
+								{source === "bountyboard" ? "BountyBoard Jobs" : info.name}
+								{!isEnabled && (
+									<span className="ml-1 opacity-50">(off)</span>
+								)}
+							</button>
+						);
+					})}
+				</div>
 			</div>
 
 			{/* Results */}
