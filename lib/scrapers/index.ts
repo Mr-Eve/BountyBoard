@@ -24,15 +24,14 @@ export * from "./base";
 const useDatabase = !!process.env.POSTGRES_URL;
 
 // Available scrapers - ALL REAL, NO MOCKS
-const scrapers: Map<GigSource, Scraper> = new Map([
-	// Free public APIs
-	["remoteok", new RemoteOKScraper()],
-	["arbeitnow", new ArbeitnowScraper()],
-	["himalayas", new HimalayasScraper()],
-	// JSearch aggregator (requires RAPIDAPI_KEY for Indeed/LinkedIn)
-	["indeed", new JSearchScraper("indeed")],
-	["linkedin", new JSearchScraper("linkedin")],
-]);
+const scrapers = new Map<GigSource, Scraper>();
+// Free public APIs
+scrapers.set("remoteok", new RemoteOKScraper());
+scrapers.set("arbeitnow", new ArbeitnowScraper());
+scrapers.set("himalayas", new HimalayasScraper());
+// JSearch aggregator (requires RAPIDAPI_KEY for Indeed/LinkedIn)
+scrapers.set("indeed", new JSearchScraper("indeed"));
+scrapers.set("linkedin", new JSearchScraper("linkedin"));
 
 // Default sources to search (free APIs that don't require keys)
 const DEFAULT_SOURCES: GigSource[] = ["remoteok", "arbeitnow", "himalayas"];
