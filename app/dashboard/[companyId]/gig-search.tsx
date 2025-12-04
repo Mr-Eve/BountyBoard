@@ -246,21 +246,37 @@ function GigResultCard({
 	isAdding: boolean;
 	isAdded: boolean;
 }) {
+	const [isExpanded, setIsExpanded] = useState(false);
 	const source = SOURCE_INFO[gig.source];
+	const isBountyBoard = gig.source === "bountyboard";
+
+	// Generate AI summary for BountyBoard jobs
+	const aiSummary = isBountyBoard ? generateAISummary(gig) : null;
 
 	return (
-		<div className="bg-white/5 border border-white/10 rounded-xl p-5 hover:bg-white/[0.07] transition-all flex flex-col">
-			{/* Header - Source & Budget */}
+		<div 
+			className={`bg-white/5 border border-white/10 rounded-xl p-5 transition-all flex flex-col cursor-pointer ${
+				isExpanded ? "bg-white/[0.07]" : "hover:bg-white/[0.07]"
+			} ${isBountyBoard ? "border-pink-500/30" : ""}`}
+			onClick={() => setIsExpanded(!isExpanded)}
+		>
+			{/* Header - Source & Budget/Outreach Label */}
 			<div className="flex items-center justify-between gap-2 mb-3">
 				<span
 					style={{ backgroundColor: source.color }}
 					className="px-2.5 py-1 rounded-md text-xs font-medium text-white"
 				>
-					{source.name}
+					{isBountyBoard ? "BountyBoard Job" : source.name}
 				</span>
-				<p className="text-lg font-bold text-amber-400">
-					{formatBudget(gig.budget)}
-				</p>
+				{isBountyBoard ? (
+					<span className="text-xs text-pink-400 font-medium">
+						Outreach Opportunity
+					</span>
+				) : (
+					<p className="text-lg font-bold text-amber-400">
+						{formatBudget(gig.budget)}
+					</p>
+				)}
 			</div>
 
 			{/* Title */}
@@ -268,13 +284,95 @@ function GigResultCard({
 				{gig.title}
 			</h4>
 
-			{/* Description */}
-			<p className="text-sm text-white/50 line-clamp-2 mb-3 flex-grow">
+			{/* AI Summary for BountyBoard jobs */}
+			{isBountyBoard && aiSummary && (
+				<div className="mb-3 p-3 bg-pink-500/10 border border-pink-500/20 rounded-lg">
+					<p className="text-sm text-pink-200">
+						{aiSummary}
+					</p>
+				</div>
+			)}
+
+			{/* Description - show more when expanded */}
+			<p className={`text-sm text-white/50 mb-3 ${isExpanded ? "" : "line-clamp-2"} flex-grow`}>
 				{gig.description}
 			</p>
 
-			{/* Skills */}
-			{gig.skills.length > 0 && (
+			{/* Expanded Content */}
+			{isExpanded && (
+				<div className="space-y-4 mb-4 pt-4 border-t border-white/10">
+					{/* Contact Info for BountyBoard */}
+					{isBountyBoard && gig.clientInfo && (
+						<div className="space-y-2">
+							<h5 className="text-sm font-medium text-white">Contact Information</h5>
+							<div className="grid grid-cols-1 gap-2 text-sm">
+								{gig.clientInfo.name && (
+									<div className="flex items-center gap-2">
+										<span className="text-white/40">Business:</span>
+										<span className="text-white">{gig.clientInfo.name}</span>
+									</div>
+								)}
+								{gig.clientInfo.location && (
+									<div className="flex items-center gap-2">
+										<span className="text-white/40">Location/Phone:</span>
+										<span className="text-white">{gig.clientInfo.location}</span>
+									</div>
+								)}
+								{gig.clientInfo.rating && (
+									<div className="flex items-center gap-2">
+										<span className="text-white/40">Rating:</span>
+										<span className="text-white">{gig.clientInfo.rating}/5 stars</span>
+										{gig.clientInfo.jobsPosted && (
+											<span className="text-white/40">({gig.clientInfo.jobsPosted} reviews)</span>
+										)}
+									</div>
+								)}
+								{gig.sourceUrl && gig.sourceUrl !== "" && (
+									<div className="flex items-center gap-2">
+										<span className="text-white/40">Website:</span>
+										<a 
+											href={gig.sourceUrl} 
+											target="_blank" 
+											rel="noopener noreferrer"
+											className="text-pink-400 hover:text-pink-300"
+											onClick={(e) => e.stopPropagation()}
+										>
+											{gig.sourceUrl.replace(/^https?:\/\//, "").slice(0, 40)}...
+										</a>
+									</div>
+								)}
+							</div>
+						</div>
+					)}
+
+					{/* Full Skills List */}
+					{gig.skills.length > 0 && (
+						<div>
+							<h5 className="text-sm font-medium text-white mb-2">Skills Needed</h5>
+							<div className="flex flex-wrap gap-1.5">
+								{gig.skills.map((skill) => (
+									<span
+										key={skill}
+										className="px-2 py-1 bg-white/10 rounded text-xs text-white/70"
+									>
+										{skill}
+									</span>
+								))}
+							</div>
+						</div>
+					)}
+
+					{/* Posted Date */}
+					{gig.postedAt && !isBountyBoard && (
+						<div className="text-xs text-white/40">
+							Posted {formatTimeAgo(gig.postedAt)}
+						</div>
+					)}
+				</div>
+			)}
+
+			{/* Collapsed Skills Preview */}
+			{!isExpanded && gig.skills.length > 0 && (
 				<div className="flex flex-wrap gap-1.5 mb-3">
 					{gig.skills.slice(0, 4).map((skill) => (
 						<span
@@ -292,16 +390,25 @@ function GigResultCard({
 				</div>
 			)}
 
-			{/* Client Info & Posted */}
-			<div className="flex items-center justify-between text-xs text-white/40 mb-4">
-				<span className="truncate">
-					{gig.clientInfo?.name || gig.clientInfo?.location || ""}
+			{/* Client Info & Posted (collapsed view) */}
+			{!isExpanded && (
+				<div className="flex items-center justify-between text-xs text-white/40 mb-4">
+					<span className="truncate">
+						{gig.clientInfo?.name || gig.clientInfo?.location || ""}
+					</span>
+					{gig.postedAt && !isBountyBoard && <span>{formatTimeAgo(gig.postedAt)}</span>}
+				</div>
+			)}
+
+			{/* Expand/Collapse Indicator */}
+			<div className="flex items-center justify-center mb-3">
+				<span className="text-xs text-white/30">
+					{isExpanded ? "Click to collapse" : "Click to expand"}
 				</span>
-				{gig.postedAt && <span>{formatTimeAgo(gig.postedAt)}</span>}
 			</div>
 
 			{/* Actions */}
-			<div className="flex gap-2 mt-auto">
+			<div className="flex gap-2 mt-auto" onClick={(e) => e.stopPropagation()}>
 				<button
 					onClick={onAdd}
 					disabled={isAdding || isAdded}
@@ -315,17 +422,64 @@ function GigResultCard({
 				>
 					{isAdded ? "Added" : isAdding ? "Adding..." : "Add to Board"}
 				</button>
-				<a
-					href={gig.sourceUrl}
-					target="_blank"
-					rel="noopener noreferrer"
-					className="px-4 py-2.5 bg-white/10 text-white/70 hover:bg-white/20 hover:text-white rounded-xl text-sm font-medium transition-all text-center"
-				>
-					View
-				</a>
+				{gig.sourceUrl && gig.sourceUrl !== "" && (
+					<a
+						href={gig.sourceUrl}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="px-4 py-2.5 bg-white/10 text-white/70 hover:bg-white/20 hover:text-white rounded-xl text-sm font-medium transition-all text-center"
+					>
+						{isBountyBoard ? "Visit" : "View"}
+					</a>
+				)}
 			</div>
 		</div>
 	);
+}
+
+// Generate AI summary for BountyBoard jobs based on the description
+function generateAISummary(gig: ScrapedGig): string {
+	const desc = gig.description.toLowerCase();
+	const businessName = gig.clientInfo?.name || "This business";
+	
+	// Detect what services are needed based on keywords in description
+	const needs: string[] = [];
+	
+	if (desc.includes("no website") || desc.includes("needs a website")) {
+		needs.push("a professional website");
+	}
+	if (desc.includes("online booking") || desc.includes("booking system") || desc.includes("hard to book")) {
+		needs.push("an online booking system");
+	}
+	if (desc.includes("contact form") || desc.includes("missing contact")) {
+		needs.push("a contact form");
+	}
+	if (desc.includes("seo") || desc.includes("not found on google") || desc.includes("hard to find online")) {
+		needs.push("SEO optimization");
+	}
+	if (desc.includes("social media") || desc.includes("inactive") || desc.includes("no engagement")) {
+		needs.push("social media management");
+	}
+	if (desc.includes("slow response") || desc.includes("never replied") || desc.includes("automation")) {
+		needs.push("customer communication automation");
+	}
+	if (desc.includes("mobile") || desc.includes("responsive")) {
+		needs.push("a mobile-friendly website");
+	}
+	if (desc.includes("reviews") || desc.includes("reputation")) {
+		needs.push("review management");
+	}
+	
+	if (needs.length === 0) {
+		needs.push("digital improvements");
+	}
+	
+	// Build the summary
+	const needsList = needs.length === 1 
+		? needs[0] 
+		: needs.slice(0, -1).join(", ") + " and " + needs[needs.length - 1];
+	
+	return `${businessName} could benefit from ${needsList}. This is a great outreach opportunity - reach out to offer your services.`;
 }
 
 function formatTimeAgo(dateString: string): string {
