@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS curated_gigs (
     gig_budget_currency VARCHAR(10) DEFAULT 'USD',
     gig_skills TEXT[], -- Array of skills
     gig_posted_at TIMESTAMP WITH TIME ZONE,
-    gig_deadline TIMESTAMP WITH TIME ZONE,
+    gig_deadline VARCHAR(255), -- Can be timestamp string or service query for AI curated
     gig_client_name VARCHAR(255),
     gig_client_rating DECIMAL(3,2),
     gig_client_jobs_posted INTEGER,

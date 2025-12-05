@@ -30,7 +30,7 @@ function rowToCuratedGig(row: any): CuratedGig {
 			} : undefined,
 			skills: row.gig_skills || [],
 			postedAt: row.gig_posted_at?.toISOString(),
-			deadline: row.gig_deadline?.toISOString(),
+			deadline: row.gig_deadline || undefined, // Can be timestamp string or service query
 			clientInfo: row.gig_client_name ? {
 				name: row.gig_client_name,
 				rating: row.gig_client_rating ? parseFloat(row.gig_client_rating) : undefined,
@@ -181,7 +181,7 @@ export async function initializeDatabase(): Promise<void> {
 				gig_budget_currency VARCHAR(10) DEFAULT 'USD',
 				gig_skills TEXT[],
 				gig_posted_at TIMESTAMP WITH TIME ZONE,
-				gig_deadline TIMESTAMP WITH TIME ZONE,
+				gig_deadline VARCHAR(255),
 				gig_client_name VARCHAR(255),
 				gig_client_rating DECIMAL(3,2),
 				gig_client_jobs_posted INTEGER,
