@@ -47,10 +47,11 @@ export async function POST(request: NextRequest) {
 		}
 
 		const body = await request.json();
-		const { companyId, gig, status } = body as {
+		const { companyId, gig, status, aiSummary } = body as {
 			companyId: string;
 			gig: ScrapedGig;
 			status?: CuratedGig["status"];
+			aiSummary?: string;
 		};
 
 		if (!companyId || !gig) {
@@ -60,7 +61,7 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
-		const curatedGig = await addCuratedGig(companyId, gig, status || "pending");
+		const curatedGig = await addCuratedGig(companyId, gig, status || "pending", aiSummary);
 
 		return NextResponse.json({ success: true, curatedGig });
 	} catch (error) {

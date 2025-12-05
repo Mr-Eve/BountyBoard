@@ -111,11 +111,12 @@ export async function getSearchQueries(companyId: string): Promise<SearchQuery[]
 export async function addCuratedGig(
 	companyId: string,
 	gig: ScrapedGig,
-	status: CuratedGig["status"] = "pending"
+	status: CuratedGig["status"] = "pending",
+	aiSummary?: string
 ): Promise<CuratedGig | null> {
 	// Use database if available
 	if (useDatabase) {
-		return addCuratedGigToDB(companyId, gig, status);
+		return addCuratedGigToDB(companyId, gig, status, aiSummary);
 	}
 
 	// Fallback to in-memory
@@ -124,6 +125,7 @@ export async function addCuratedGig(
 		companyId,
 		gig,
 		status,
+		aiSummary,
 		addedAt: new Date().toISOString(),
 	};
 	curatedGigs.set(curatedGig.id, curatedGig);

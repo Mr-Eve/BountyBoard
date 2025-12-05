@@ -79,7 +79,7 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 	};
 
 	// Add directly to board (approved status)
-	const handleAddToBoard = async (gig: ScrapedGig) => {
+	const handleAddToBoard = async (gig: ScrapedGig, aiSummary?: string) => {
 		setAddingGigs((prev) => new Set(prev).add(gig.id));
 
 		try {
@@ -90,6 +90,7 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 					companyId,
 					gig,
 					status: "approved", // Goes directly to Board
+					aiSummary, // Include AI summary for bountyboard gigs
 				}),
 			});
 
@@ -108,7 +109,7 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 	};
 
 	// Save for later (pending status)
-	const handleSaveGig = async (gig: ScrapedGig) => {
+	const handleSaveGig = async (gig: ScrapedGig, aiSummary?: string) => {
 		setSavingGigs((prev) => new Set(prev).add(gig.id));
 
 		try {
@@ -119,6 +120,7 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 					companyId,
 					gig,
 					status: "pending", // Goes to Saved
+					aiSummary, // Include AI summary for bountyboard gigs
 				}),
 			});
 
@@ -314,8 +316,8 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 							<GigResultCard
 								key={gig.id}
 								gig={gig}
-								onAddToBoard={() => handleAddToBoard(gig)}
-								onSave={() => handleSaveGig(gig)}
+								onAddToBoard={(aiSummary) => handleAddToBoard(gig, aiSummary)}
+								onSave={(aiSummary) => handleSaveGig(gig, aiSummary)}
 								isAdding={addingGigs.has(gig.id)}
 								isAdded={addedGigs.has(gig.id)}
 								isSaving={savingGigs.has(gig.id)}
@@ -339,8 +341,8 @@ function GigResultCard({
 	isSaved,
 }: {
 	gig: ScrapedGig;
-	onAddToBoard: () => void;
-	onSave: () => void;
+	onAddToBoard: (aiSummary?: string) => void;
+	onSave: (aiSummary?: string) => void;
 	isAdding: boolean;
 	isAdded: boolean;
 	isSaving: boolean;
@@ -558,7 +560,7 @@ function GigResultCard({
 			<div className="flex gap-2 mt-auto" onClick={(e) => e.stopPropagation()}>
 				{/* Add to Board button - goes directly to Board tab */}
 				<button
-					onClick={onAddToBoard}
+					onClick={() => onAddToBoard(aiSummary || undefined)}
 					disabled={isAdding || isAdded}
 					className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
 						isAdded
@@ -572,7 +574,7 @@ function GigResultCard({
 				</button>
 				{/* Save button - goes to Saved tab */}
 				<button
-					onClick={onSave}
+					onClick={() => onSave(aiSummary || undefined)}
 					disabled={isSaving || isSaved || isAdded}
 					className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
 						isSaved

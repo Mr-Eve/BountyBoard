@@ -83,7 +83,7 @@ export default async function ExperiencePage({
 }
 
 function GigCard({ curatedGig }: { curatedGig: CuratedGig }) {
-	const { gig, customReward, notes } = curatedGig;
+	const { gig, customReward, notes, aiSummary } = curatedGig;
 	const source = SOURCE_INFO[gig.source];
 	const isBountyBoard = gig.source === "bountyboard";
 
@@ -113,9 +113,21 @@ function GigCard({ curatedGig }: { curatedGig: CuratedGig }) {
 				<h3 className="text-xl font-semibold text-white mb-2 group-hover:text-amber-200 transition-colors">
 					{gig.title}
 				</h3>
-				<p className="text-white/50 text-sm line-clamp-2 mb-4">
-					{gig.description}
-				</p>
+				
+				{/* AI Summary for BountyBoard gigs */}
+				{isBountyBoard && aiSummary && (
+					<div className="mb-4 p-3 bg-pink-500/10 border border-pink-500/20 rounded-lg">
+						<p className="text-sm text-pink-200">
+							{aiSummary}
+						</p>
+					</div>
+				)}
+
+				{!aiSummary && (
+					<p className="text-white/50 text-sm line-clamp-2 mb-4">
+						{gig.description}
+					</p>
+				)}
 
 				{/* Leader's Notes */}
 				{notes && (

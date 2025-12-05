@@ -68,6 +68,7 @@ export interface CuratedGig {
 	status: "pending" | "approved" | "rejected" | "hidden";
 	notes?: string; // Leader's notes for members
 	customReward?: string; // Override the budget display
+	aiSummary?: string; // AI-generated summary for bountyboard gigs
 	addedAt: string;
 	approvedAt?: string;
 }

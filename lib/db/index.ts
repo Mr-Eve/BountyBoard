@@ -14,6 +14,7 @@ function rowToCuratedGig(row: any): CuratedGig {
 		status: row.status,
 		notes: row.notes,
 		customReward: row.custom_reward,
+		aiSummary: row.ai_summary || undefined,
 		addedAt: row.added_at?.toISOString(),
 		approvedAt: row.approved_at?.toISOString(),
 		gig: {
@@ -73,7 +74,8 @@ export async function getCuratedGigsFromDB(
 export async function addCuratedGigToDB(
 	companyId: string,
 	gig: ScrapedGig,
-	status: CuratedGig["status"] = "pending"
+	status: CuratedGig["status"] = "pending",
+	aiSummary?: string
 ): Promise<CuratedGig | null> {
 	try {
 		const id = generateId("cg");
@@ -89,7 +91,7 @@ export async function addCuratedGigToDB(
 				gig_budget_min, gig_budget_max, gig_budget_type, gig_budget_currency,
 				gig_skills, gig_posted_at, gig_deadline,
 				gig_client_name, gig_client_rating, gig_client_jobs_posted, gig_client_location,
-				gig_scraped_at
+				gig_scraped_at, ai_summary
 			) VALUES (
 				${id}, ${companyId}, ${status}, ${now},
 				${gig.source}, ${gig.sourceUrl}, ${gig.title}, ${gig.description},
@@ -99,7 +101,7 @@ export async function addCuratedGigToDB(
 				${gig.deadline || null},
 				${gig.clientInfo?.name || null}, ${gig.clientInfo?.rating || null},
 				${gig.clientInfo?.jobsPosted || null}, ${gig.clientInfo?.location || null},
-				${gig.scrapedAt || now}
+				${gig.scrapedAt || now}, ${aiSummary || null}
 			)
 		`;
 
@@ -107,6 +109,7 @@ export async function addCuratedGigToDB(
 			id,
 			companyId,
 			status,
+			aiSummary,
 			addedAt: now,
 			gig,
 		};

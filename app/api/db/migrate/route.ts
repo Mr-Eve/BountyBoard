@@ -24,7 +24,23 @@ export async function POST() {
 			}
 		}
 
-		// Migration 2: Ensure all required columns exist
+		// Migration 2: Add ai_summary column if it doesn't exist
+		try {
+			await sql`
+				ALTER TABLE curated_gigs 
+				ADD COLUMN IF NOT EXISTS ai_summary TEXT
+			`;
+			results.push("✓ ai_summary column added (or already exists)");
+		} catch (e) {
+			const msg = e instanceof Error ? e.message : String(e);
+			if (msg.includes("already exists") || msg.includes("duplicate")) {
+				results.push("✓ ai_summary column already exists");
+			} else {
+				results.push(`✗ ai_summary migration failed: ${msg}`);
+			}
+		}
+
+		// Migration 3: Ensure all required columns exist
 		try {
 			// Check if table exists first
 			const tableCheck = await sql`
