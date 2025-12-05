@@ -193,7 +193,7 @@ function GigCard({ curatedGig }: { curatedGig: CuratedGig }) {
 						href={gig.sourceUrl}
 						target="_blank"
 						rel="noopener noreferrer"
-						className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-amber-500 to-orange-500 text-black hover:from-amber-400 hover:to-orange-400 transition-all"
+						className="px-5 py-2.5 rounded-xl text-sm font-medium bg-white/10 text-white/70 hover:bg-white/20 hover:text-white transition-all"
 					>
 						Apply Now
 					</a>

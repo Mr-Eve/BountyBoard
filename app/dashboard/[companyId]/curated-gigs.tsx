@@ -52,21 +52,21 @@ export function CuratedGigsSection({
 
 	return (
 		<div>
-			<div className="flex items-center justify-between mb-4">
-				<h2 className="text-xl font-semibold text-white">
-					Recently Curated Gigs
-				</h2>
-				{showViewAll && (
+			{showViewAll && (
+				<div className="flex items-center justify-between mb-4">
+					<h2 className="text-xl font-semibold text-white">
+						Recently Curated Gigs
+					</h2>
 					<Link
 						href={`/dashboard/${companyId}/curated`}
 						className="text-sm text-amber-400 hover:text-amber-300"
 					>
 						View all
 					</Link>
-				)}
-			</div>
+				</div>
+			)}
 
-			<div className="space-y-3">
+			<div className="grid md:grid-cols-2 gap-5">
 				{gigs.map((curatedGig) => (
 					<CuratedGigCard
 						key={curatedGig.id}
@@ -91,106 +91,144 @@ function CuratedGigCard({
 	onUpdateStatus: (status: CuratedGig["status"]) => void;
 	isUpdating: boolean;
 }) {
-	const { gig, status } = curatedGig;
+	const { gig, status, notes, customReward, aiSummary } = curatedGig;
 	const source = SOURCE_INFO[gig.source];
-
-	const statusColors = {
-		pending: "bg-amber-500/20 text-amber-400",
-		approved: "bg-emerald-500/20 text-emerald-400",
-		rejected: "bg-red-500/20 text-red-400",
-		hidden: "bg-gray-500/20 text-gray-400",
-	};
-
-	const statusLabels = {
-		pending: "Pending",
-		approved: "Approved",
-		rejected: "Rejected",
-		hidden: "Hidden",
-	};
+	const isBountyBoard = gig.source === "bountyboard";
 
 	return (
-		<div className="bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/[0.07] transition-all">
-			<div className="flex items-center gap-4">
+		<div className="group relative bg-white/5 hover:bg-white/[0.07] border border-white/10 hover:border-amber-500/30 rounded-2xl p-6 transition-all">
+			{/* Glow effect on hover */}
+			<div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-amber-500/0 to-orange-500/0 group-hover:from-amber-500/5 group-hover:to-orange-500/5 transition-all" />
+
+			<div className="relative">
+				{/* Header */}
+				<div className="flex items-start justify-between gap-4 mb-4">
+					<span
+						style={{ backgroundColor: source.color }}
+						className="px-3 py-1 rounded-lg text-white text-xs font-medium flex items-center gap-1"
+					>
+						{isBountyBoard && <span>✦</span>}
+						{isBountyBoard ? "AI Curated" : source.name}
+					</span>
+					{gig.clientInfo?.rating && (
+						<span className="px-2 py-1 bg-amber-500/20 text-amber-400 rounded-lg text-xs font-medium">
+							{gig.clientInfo.rating} stars
+						</span>
+					)}
+				</div>
+
 				{/* Content */}
-				<div className="flex-1 min-w-0">
-					<div className="flex items-center gap-2 mb-1">
-						<span
-							style={{ backgroundColor: source.color }}
-							className="px-2.5 py-0.5 rounded text-xs font-medium text-white"
-						>
-							{source.name}
-						</span>
-						<span
-							className={`px-2 py-0.5 rounded text-xs font-medium ${statusColors[status]}`}
-						>
-							{statusLabels[status]}
-						</span>
+				<h3 className="text-xl font-semibold text-white mb-2 group-hover:text-amber-200 transition-colors">
+					{gig.title}
+				</h3>
+				
+				{/* AI Summary for BountyBoard gigs */}
+				{isBountyBoard && aiSummary && (
+					<div className="mb-4 p-3 bg-pink-500/10 border border-pink-500/20 rounded-lg">
+						<p className="text-sm text-pink-200">
+							{aiSummary}
+						</p>
 					</div>
-					<h4 className="text-white font-medium truncate">{gig.title}</h4>
-					<p className="text-sm text-white/40 truncate">{gig.description}</p>
-				</div>
+				)}
 
-				{/* Budget */}
-				<div className="text-right shrink-0">
-					<p className="text-lg font-semibold text-amber-400">
-						{formatBudget(gig.budget)}
+				{!aiSummary && (
+					<p className="text-white/50 text-sm line-clamp-2 mb-4">
+						{gig.description}
 					</p>
-				</div>
+				)}
 
-				{/* Actions */}
-				<div className="flex items-center gap-2 shrink-0">
-					{status === "pending" && (
-						<>
+				{/* Leader's Notes */}
+				{notes && (
+					<div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+						<p className="text-sm text-amber-200">
+							<span className="font-medium">Note:</span> {notes}
+						</p>
+					</div>
+				)}
+
+				{/* Skills */}
+				{gig.skills.length > 0 && (
+					<div className="flex flex-wrap gap-2 mb-4">
+						{gig.skills.slice(0, 4).map((skill) => (
+							<span
+								key={skill}
+								className="px-2 py-1 text-xs bg-white/5 text-white/50 rounded-md"
+							>
+								{skill}
+							</span>
+						))}
+						{gig.skills.length > 4 && (
+							<span className="px-2 py-1 text-xs bg-white/5 text-white/40 rounded-md">
+								+{gig.skills.length - 4} more
+							</span>
+						)}
+					</div>
+				)}
+
+				{/* Client Info */}
+				{gig.clientInfo && (
+					<div className="flex items-center gap-3 text-xs text-white/40 mb-4">
+						{gig.clientInfo.name && (
+							<span className="flex items-center gap-1">
+								{gig.clientInfo.name}
+							</span>
+						)}
+						{gig.clientInfo.location && (
+							<span className="flex items-center gap-1">
+								{gig.clientInfo.location}
+							</span>
+						)}
+					</div>
+				)}
+
+				{/* Footer */}
+				<div className="flex items-center justify-between pt-4 border-t border-white/5">
+					<div>
+						<p className="text-2xl font-bold text-amber-400">
+							{customReward || formatBudget(gig.budget)}
+						</p>
+						{gig.postedAt && (
+							<p className="text-xs text-white/40">
+								Posted{" "}
+								{new Date(gig.postedAt).toLocaleDateString("en-US", {
+									month: "short",
+									day: "numeric",
+								})}
+							</p>
+						)}
+					</div>
+					
+					{/* Actions */}
+					<div className="flex items-center gap-2">
+						{status === "approved" && (
+							<button
+								onClick={() => onUpdateStatus("hidden")}
+								disabled={isUpdating}
+								className="px-4 py-2.5 bg-white/10 text-white/70 hover:bg-white/20 hover:text-white rounded-xl transition-all disabled:opacity-50 text-sm font-medium"
+							>
+								{isUpdating ? "..." : "Hide"}
+							</button>
+						)}
+						{(status === "rejected" || status === "hidden") && (
 							<button
 								onClick={() => onUpdateStatus("approved")}
 								disabled={isUpdating}
-								className="px-3 py-2 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 rounded-lg transition-all disabled:opacity-50 text-xs font-medium"
-								title="Approve"
+								className="px-4 py-2.5 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 rounded-xl transition-all disabled:opacity-50 text-sm font-medium"
 							>
-								Approve
+								{isUpdating ? "..." : "Approve"}
 							</button>
-							<button
-								onClick={() => onUpdateStatus("rejected")}
-								disabled={isUpdating}
-								className="px-3 py-2 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-lg transition-all disabled:opacity-50 text-xs font-medium"
-								title="Reject"
-							>
-								Reject
-							</button>
-						</>
-					)}
-					{status === "approved" && (
-						<button
-							onClick={() => onUpdateStatus("hidden")}
-							disabled={isUpdating}
-							className="px-3 py-2 bg-white/10 text-white/50 hover:bg-white/20 rounded-lg transition-all disabled:opacity-50 text-xs font-medium"
-							title="Hide"
+						)}
+						<a
+							href={gig.sourceUrl}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="px-4 py-2.5 bg-white/10 text-white/70 hover:bg-white/20 hover:text-white rounded-xl transition-all text-sm font-medium"
 						>
-							Hide
-						</button>
-					)}
-					{(status === "rejected" || status === "hidden") && (
-						<button
-							onClick={() => onUpdateStatus("approved")}
-							disabled={isUpdating}
-							className="px-3 py-2 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 rounded-lg transition-all disabled:opacity-50 text-xs font-medium"
-							title="Approve"
-						>
-							Approve
-						</button>
-					)}
-					<a
-						href={gig.sourceUrl}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="px-3 py-2 bg-white/5 text-white/50 hover:text-white rounded-lg transition-all text-xs font-medium"
-						title="View original"
-					>
-						View
-					</a>
+							View
+						</a>
+					</div>
 				</div>
 			</div>
 		</div>
 	);
 }
-
