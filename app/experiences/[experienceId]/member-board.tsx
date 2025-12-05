@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { SOURCE_INFO, type CuratedGig } from "@/lib/scrapers/types";
 import { formatBudget } from "@/lib/scrapers/base";
-import { OnboardingModal, OnboardingHelpButton } from "@/app/components/onboarding-modal";
+import { OnboardingModal, OnboardingGuideButton } from "@/app/components/onboarding-modal";
 
 interface MemberBoardProps {
 	gigs: CuratedGig[];
@@ -41,7 +41,6 @@ export function MemberBoard({ gigs }: MemberBoardProps) {
 		<div>
 			{/* Onboarding */}
 			<OnboardingModal variant="member" storageKey="bountyboard-member-onboarding" />
-			<OnboardingHelpButton variant="member" storageKey="bountyboard-member-onboarding" />
 
 			{/* Search Bar */}
 			<div className="mb-6" data-onboarding="member-search">

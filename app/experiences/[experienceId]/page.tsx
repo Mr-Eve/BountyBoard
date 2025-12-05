@@ -3,6 +3,7 @@ import Image from "next/image";
 import { whopsdk } from "@/lib/whop-sdk";
 import { getApprovedGigs } from "@/lib/scrapers";
 import { MemberBoard } from "./member-board";
+import { MemberGuideButton } from "./guide-button";
 
 export default async function ExperiencePage({
 	params,
@@ -37,18 +38,21 @@ export default async function ExperiencePage({
 				<div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl" />
 
 				<div className="relative max-w-6xl mx-auto px-6 py-12">
-					<div className="flex items-center gap-4 mb-4">
-						<Image
-							src="/BountyBoardIcon.png"
-							alt="Bounty Board"
-							width={56}
-							height={56}
-							className="rounded-2xl shadow-xl shadow-amber-500/30"
-						/>
-						<div>
-							<h1 className="text-3xl font-bold text-white">Bounty Board</h1>
-							<p className="text-white/50">Welcome back, {displayName}</p>
+					<div className="flex items-center justify-between mb-4">
+						<div className="flex items-center gap-4">
+							<Image
+								src="/BountyBoardIcon.png"
+								alt="Bounty Board"
+								width={56}
+								height={56}
+								className="rounded-2xl shadow-xl shadow-amber-500/30"
+							/>
+							<div>
+								<h1 className="text-3xl font-bold text-white">Bounty Board</h1>
+								<p className="text-white/50">Welcome back, {displayName}</p>
+							</div>
 						</div>
+						<MemberGuideButton />
 					</div>
 
 					<p className="text-white/70 text-lg max-w-2xl mb-6">

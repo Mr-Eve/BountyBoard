@@ -4,7 +4,7 @@ import { getCuratedGigs } from "@/lib/scrapers";
 import Link from "next/link";
 import Image from "next/image";
 import { GigSearchSection } from "./gig-search";
-import { OnboardingModal, OnboardingHelpButton } from "@/app/components/onboarding-modal";
+import { OnboardingModal, OnboardingGuideButton } from "@/app/components/onboarding-modal";
 
 export default async function DashboardPage({
 	params,
@@ -32,7 +32,6 @@ export default async function DashboardPage({
 		<div className="min-h-screen bg-[#0a0a0b]">
 			{/* Onboarding */}
 			<OnboardingModal variant="admin" storageKey="bountyboard-admin-onboarding" />
-			<OnboardingHelpButton variant="admin" storageKey="bountyboard-admin-onboarding" />
 
 			{/* Header */}
 			<header className="border-b border-white/10 bg-gradient-to-r from-amber-500/10 via-transparent to-orange-500/10">
@@ -55,6 +54,7 @@ export default async function DashboardPage({
 								{companyName} • Managed by {displayName}
 							</p>
 						</div>
+						<OnboardingGuideButton variant="admin" storageKey="bountyboard-admin-onboarding" />
 					</div>
 				</div>
 			</header>

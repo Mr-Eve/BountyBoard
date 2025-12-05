@@ -93,7 +93,7 @@ const ADMIN_STEPS: OnboardingStep[] = [
 	{
 		title: "You're Ready",
 		description:
-			"Start by searching for a service your community offers. Click the ? button anytime to see this guide again.",
+			"Start by searching for a service your community offers. Click the 'Guide' button in the header anytime to see this guide again.",
 		position: "center",
 	},
 ];
@@ -127,13 +127,6 @@ const MEMBER_STEPS: OnboardingStep[] = [
 		position: "top",
 	},
 	{
-		title: "Pinned Gigs",
-		description:
-			"Gigs with a gold 'Pinned' tag are highlighted by your community leaders as especially good opportunities. Check these first!",
-		targetSelector: "[data-onboarding='pinned-tag']",
-		position: "top",
-	},
-	{
 		title: "Apply for Gigs",
 		description:
 			"Found something interesting? Click 'Apply Now' to go directly to the original posting and submit your application. Good luck!",
@@ -155,12 +148,14 @@ export function OnboardingModal({ variant, storageKey }: OnboardingProps) {
 	const steps = variant === "admin" ? ADMIN_STEPS : MEMBER_STEPS;
 	const step = steps[currentStep];
 
-	// Always show on reload for testing
+	// Show onboarding only on first visit
 	useEffect(() => {
-		// For testing: always show onboarding
-		setIsOpen(true);
-		setCurrentStep(0);
-	}, []);
+		const hasSeenOnboarding = localStorage.getItem(storageKey);
+		if (!hasSeenOnboarding) {
+			setIsOpen(true);
+			setCurrentStep(0);
+		}
+	}, [storageKey]);
 
 	// Execute action when step changes
 	useEffect(() => {
@@ -397,19 +392,19 @@ export function OnboardingModal({ variant, storageKey }: OnboardingProps) {
 	);
 }
 
-// Help button component to re-open onboarding
-export function OnboardingHelpButton({ variant, storageKey }: OnboardingProps) {
+// Header button component to re-open onboarding (for use in page headers)
+export function OnboardingGuideButton({ variant, storageKey }: OnboardingProps) {
 	const [showModal, setShowModal] = useState(false);
 
 	return (
 		<>
 			<button
 				onClick={() => setShowModal(true)}
-				className="fixed bottom-6 right-6 w-12 h-12 bg-white/10 hover:bg-white/20 border border-white/10 rounded-full flex items-center justify-center text-white/70 hover:text-white transition-all shadow-lg z-40"
+				className="px-3 py-1.5 bg-white/10 hover:bg-white/20 border border-white/10 rounded-lg flex items-center gap-2 text-white/70 hover:text-white text-sm font-medium transition-all"
 				title="Show guide"
 			>
 				<svg
-					className="w-5 h-5"
+					className="w-4 h-4"
 					fill="none"
 					stroke="currentColor"
 					viewBox="0 0 24 24"
@@ -421,6 +416,7 @@ export function OnboardingHelpButton({ variant, storageKey }: OnboardingProps) {
 						d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
 					/>
 				</svg>
+				Guide
 			</button>
 			{showModal && (
 				<OnboardingModalManual
