@@ -249,7 +249,7 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 											: "text-white/50 hover:text-white/70"
 									}`}
 								>
-									{source === "bountyboard" ? "BountyBoard" : info.name}
+									{source === "bountyboard" ? "AI Curated" : info.name}
 								</button>
 							);
 						})}
@@ -366,7 +366,7 @@ function GigResultCard({
 					style={{ backgroundColor: source.color }}
 					className="px-2.5 py-1 rounded-md text-xs font-medium text-white"
 				>
-					{isBountyBoard ? "BountyBoard Job" : source.name}
+					{isBountyBoard ? "AI Curated" : source.name}
 				</span>
 				{isBountyBoard ? (
 					<span className="text-xs text-pink-400 font-medium">
