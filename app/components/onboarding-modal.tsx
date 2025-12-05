@@ -7,7 +7,6 @@ interface OnboardingStep {
 	description: string;
 	targetSelector?: string; // CSS selector for element to highlight
 	position?: "top" | "bottom" | "left" | "right" | "center";
-	icon?: string;
 	action?: () => void; // Action to perform when entering this step
 }
 
@@ -34,7 +33,7 @@ const closeAdvancedSearch = () => {
 
 const ADMIN_STEPS: OnboardingStep[] = [
 	{
-		title: "Welcome to Bounty Board! 🎯",
+		title: "Welcome to Bounty Board",
 		description:
 			"Your command center for curating freelance opportunities for your community. Let's walk through the key features.",
 		position: "center",
@@ -46,7 +45,6 @@ const ADMIN_STEPS: OnboardingStep[] = [
 			"Type a service or skill (like 'web design' or 'SEO') and hit Search to find opportunities across multiple freelance platforms.",
 		targetSelector: "[data-onboarding='search-input']",
 		position: "bottom",
-		icon: "🔍",
 	},
 	{
 		title: "Advanced Search Options",
@@ -54,15 +52,13 @@ const ADMIN_STEPS: OnboardingStep[] = [
 			"Click here to access location filters and toggle different job sources. Let's open it to see what's inside.",
 		targetSelector: "[data-onboarding='advanced-search']",
 		position: "bottom",
-		icon: "⚙️",
 	},
 	{
-		title: "✦ AI Curated Results",
+		title: "AI Curated Results",
 		description:
 			"This is the magic! When enabled, AI Curated searches for local businesses in your area and uses AI to explain exactly how your community's services could help them. These are outreach opportunities, not job postings.",
 		targetSelector: "[data-onboarding='ai-curated-toggle']",
 		position: "bottom",
-		icon: "✦",
 		action: openAdvancedSearch, // Open advanced search to show the toggle
 	},
 	{
@@ -71,7 +67,6 @@ const ADMIN_STEPS: OnboardingStep[] = [
 			"Toggle these to search different freelance platforms like RemoteOK, Arbeitnow, and Himalayas. Mix and match to find the best opportunities.",
 		targetSelector: "[data-onboarding='source-toggles']",
 		position: "bottom",
-		icon: "🌐",
 	},
 	{
 		title: "Find Gigs Tab",
@@ -79,7 +74,6 @@ const ADMIN_STEPS: OnboardingStep[] = [
 			"This is where you search for new opportunities. Results from various platforms will appear here after searching.",
 		targetSelector: "[data-onboarding='tab-find']",
 		position: "bottom",
-		icon: "🔍",
 		action: closeAdvancedSearch, // Close advanced search for cleaner view
 	},
 	{
@@ -88,7 +82,6 @@ const ADMIN_STEPS: OnboardingStep[] = [
 			"Approved gigs appear here and are visible to your community members. This is what your members will see.",
 		targetSelector: "[data-onboarding='tab-board']",
 		position: "bottom",
-		icon: "📋",
 	},
 	{
 		title: "Saved Tab",
@@ -96,20 +89,18 @@ const ADMIN_STEPS: OnboardingStep[] = [
 			"Gigs you save for later go here. Review them when you're ready and add the best ones to your Board.",
 		targetSelector: "[data-onboarding='tab-saved']",
 		position: "bottom",
-		icon: "💾",
 	},
 	{
-		title: "You're Ready!",
+		title: "You're Ready",
 		description:
 			"Start by searching for a service your community offers. Click the ? button anytime to see this guide again.",
 		position: "center",
-		icon: "🚀",
 	},
 ];
 
 const MEMBER_STEPS: OnboardingStep[] = [
 	{
-		title: "Welcome to Bounty Board! 🎯",
+		title: "Welcome to Bounty Board",
 		description:
 			"Your community leaders have curated freelance opportunities just for you. Let's show you how to find your next gig.",
 		position: "center",
@@ -120,7 +111,6 @@ const MEMBER_STEPS: OnboardingStep[] = [
 			"Use this search bar to filter through all the curated opportunities. Search by title, skills, location, or keywords.",
 		targetSelector: "[data-onboarding='member-search']",
 		position: "bottom",
-		icon: "🔍",
 	},
 	{
 		title: "Gig Cards",
@@ -128,15 +118,13 @@ const MEMBER_STEPS: OnboardingStep[] = [
 			"Each card shows a curated opportunity with details about the project, required skills, and budget. Look for the source tag to see where it came from.",
 		targetSelector: "[data-onboarding='gig-card']",
 		position: "top",
-		icon: "📋",
 	},
 	{
 		title: "AI Curated Opportunities",
 		description:
-			"Gigs with the ✦ AI Curated tag are special! These are local businesses that could use your services. The pink box explains exactly how you can help them.",
+			"Gigs with the AI Curated tag are special! These are local businesses that could use your services. The pink box explains exactly how you can help them.",
 		targetSelector: "[data-onboarding='ai-curated']",
 		position: "top",
-		icon: "✦",
 	},
 	{
 		title: "Pinned Gigs",
@@ -144,7 +132,6 @@ const MEMBER_STEPS: OnboardingStep[] = [
 			"Gigs with a gold 'Pinned' tag are highlighted by your community leaders as especially good opportunities. Check these first!",
 		targetSelector: "[data-onboarding='pinned-tag']",
 		position: "top",
-		icon: "📌",
 	},
 	{
 		title: "Apply for Gigs",
@@ -152,7 +139,6 @@ const MEMBER_STEPS: OnboardingStep[] = [
 			"Found something interesting? Click 'Apply Now' to go directly to the original posting and submit your application. Good luck!",
 		targetSelector: "[data-onboarding='apply-button']",
 		position: "top",
-		icon: "🚀",
 	},
 ];
 
@@ -369,15 +355,10 @@ export function OnboardingModal({ variant, storageKey }: OnboardingProps) {
 						))}
 					</div>
 
-					{/* Icon & Title */}
-					<div className="flex items-center gap-3 mb-3">
-						{step.icon && (
-							<span className="text-2xl">{step.icon}</span>
-						)}
-						<h2 className="text-lg font-bold text-white">
-							{step.title}
-						</h2>
-					</div>
+					{/* Title */}
+					<h2 className="text-lg font-bold text-white mb-3">
+						{step.title}
+					</h2>
 
 					{/* Description */}
 					<p className="text-white/60 text-sm leading-relaxed mb-5">
@@ -397,14 +378,14 @@ export function OnboardingModal({ variant, storageKey }: OnboardingProps) {
 							{!isFirstStep && (
 								<button
 									onClick={handlePrev}
-									className="px-4 py-2 bg-white/10 text-white/70 hover:bg-white/20 hover:text-white rounded-lg text-sm font-medium transition-all"
+									className="px-4 py-2 bg-white/10 text-white/70 hover:bg-white/20 hover:text-white rounded-xl text-sm font-medium transition-all"
 								>
 									Back
 								</button>
 							)}
 							<button
 								onClick={handleNext}
-								className="px-4 py-2 bg-gradient-to-r from-amber-400 to-orange-500 text-black rounded-lg text-sm font-medium hover:from-amber-300 hover:to-orange-400 transition-all"
+								className="px-4 py-2 bg-white/10 text-white/70 hover:bg-white/20 hover:text-white rounded-xl text-sm font-medium transition-all"
 							>
 								{isLastStep ? "Get Started" : "Next"}
 							</button>
@@ -643,10 +624,7 @@ function OnboardingModalManual({
 						))}
 					</div>
 
-					<div className="flex items-center gap-3 mb-3">
-						{step.icon && <span className="text-2xl">{step.icon}</span>}
-						<h2 className="text-lg font-bold text-white">{step.title}</h2>
-					</div>
+					<h2 className="text-lg font-bold text-white mb-3">{step.title}</h2>
 
 					<p className="text-white/60 text-sm leading-relaxed mb-5">
 						{step.description}
@@ -664,14 +642,14 @@ function OnboardingModalManual({
 							{!isFirstStep && (
 								<button
 									onClick={handlePrev}
-									className="px-4 py-2 bg-white/10 text-white/70 hover:bg-white/20 hover:text-white rounded-lg text-sm font-medium transition-all"
+									className="px-4 py-2 bg-white/10 text-white/70 hover:bg-white/20 hover:text-white rounded-xl text-sm font-medium transition-all"
 								>
 									Back
 								</button>
 							)}
 							<button
 								onClick={handleNext}
-								className="px-4 py-2 bg-gradient-to-r from-amber-400 to-orange-500 text-black rounded-lg text-sm font-medium hover:from-amber-300 hover:to-orange-400 transition-all"
+								className="px-4 py-2 bg-white/10 text-white/70 hover:bg-white/20 hover:text-white rounded-xl text-sm font-medium transition-all"
 							>
 								{isLastStep ? "Done" : "Next"}
 							</button>
