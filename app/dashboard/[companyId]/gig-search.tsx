@@ -484,6 +484,20 @@ function GigResultCard({
 
 			{/* Actions */}
 			<div className="flex gap-2 mt-auto" onClick={(e) => e.stopPropagation()}>
+				{/* Add to Board button - goes directly to Board tab */}
+				<button
+					onClick={onAddToBoard}
+					disabled={isAdding || isAdded}
+					className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+						isAdded
+							? "bg-emerald-500/20 text-emerald-400 cursor-default"
+							: isAdding
+							? "bg-white/10 text-white/50 cursor-wait"
+							: "bg-white/10 text-white/70 hover:bg-white/20 hover:text-white"
+					}`}
+				>
+					{isAdded ? "On Board" : isAdding ? "Adding..." : "Add to Board"}
+				</button>
 				{/* Save button - goes to Saved tab */}
 				<button
 					onClick={onSave}
@@ -499,20 +513,6 @@ function GigResultCard({
 					}`}
 				>
 					{isSaved ? "Saved" : isSaving ? "..." : "Save"}
-				</button>
-				{/* Add to Board button - goes directly to Board tab */}
-				<button
-					onClick={onAddToBoard}
-					disabled={isAdding || isAdded}
-					className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
-						isAdded
-							? "bg-emerald-500/20 text-emerald-400 cursor-default"
-							: isAdding
-							? "bg-white/10 text-white/50 cursor-wait"
-							: "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
-					}`}
-				>
-					{isAdded ? "On Board" : isAdding ? "Adding..." : "Add to Board"}
 				</button>
 				{gig.sourceUrl && gig.sourceUrl !== "" && (
 					<a
