@@ -138,7 +138,7 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 
 	return (
 		<div>
-			<h1 className="font-bold text-white mb-4" style={{ fontSize: '2rem' }}>
+			<h1 className="font-bold text-white mb-1" style={{ fontSize: '2rem' }}>
 				Search for Gigs & Opportunities
 			</h1>
 			<p className="text-white/50 text-sm mb-1" style={{ fontSize: '.8rem', paddingBottom: '10px' }}>
