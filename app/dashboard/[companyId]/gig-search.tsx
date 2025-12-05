@@ -142,9 +142,13 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 				Search for Gigs & Opportunities
 			</h1>
 			<p className="text-white/50 text-sm mb-1" style={{ fontSize: '.9rem' }}>
-				Search freelance platforms for jobs, plus discover AI-curated opportunities - 
+				Search freelance platforms for jobs, plus discover 
 				<br />
-				service ideas for businesses based on their reviews and business analysis.
+				service ideas for AI-curated opportunities - 
+				<br />
+				businesses based on their reviews and business analysis.
+				<br />
+				 
 			</p>
 
 			{/* Search Inputs */}
