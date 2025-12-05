@@ -138,9 +138,9 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 
 	return (
 		<div>
-			<h2 className="text-xl font-semibold text-white mb-4">
+			<h1 className="text-2xl font-bold text-white mb-2">
 				Search for Gigs & Opportunities
-			</h2>
+			</h1>
 			<p className="text-white/50 text-sm mb-6">
 				Search freelance platforms for jobs, plus discover BountyBoard opportunities - service ideas for local businesses based on their pain points.
 			</p>
@@ -206,52 +206,47 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 
 			{/* Advanced Search Options */}
 			{showAdvanced && (
-				<div className="mb-6 p-4 bg-white/5 border border-white/10 rounded-xl space-y-4">
+				<div className="mb-6 px-4 py-3 bg-white/5 border border-white/10 rounded-xl flex flex-col md:flex-row md:items-center gap-4">
 					{/* Location Input */}
-					<div>
-						<label className="text-white/50 text-xs mb-2 block">Location (for BountyBoard Jobs)</label>
+					<div className="flex items-center gap-2">
+						<label className="text-white/40 text-xs whitespace-nowrap">Location:</label>
 						<input
 							type="text"
 							value={location}
 							onChange={(e) => setLocation(e.target.value)}
 							onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-							placeholder="e.g., 'Austin, TX'"
-							className="w-full md:w-64 px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/30 focus:outline-none focus:border-amber-500/50 focus:bg-white/[0.07] transition-all text-sm"
+							placeholder="e.g., Austin, TX"
+							className="w-full md:w-48 px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/30 focus:outline-none focus:border-amber-500/50 text-sm"
 						/>
-						<p className="text-white/30 text-xs mt-1.5">
-							Add a location to find BountyBoard Jobs - real local businesses that need your services
-						</p>
 					</div>
 
-					{/* Source Pills - Clickable to toggle */}
-					<div>
-						<p className="text-white/50 text-xs mb-2">Click to toggle sources:</p>
-						<div className="flex flex-wrap gap-2">
-							{AVAILABLE_SOURCES.map((source) => {
-								const info = SOURCE_INFO[source];
-								const isEnabled = enabledSources.has(source);
-								return (
-									<button
-										key={source}
-										onClick={() => toggleSource(source)}
-										style={{ 
-											backgroundColor: isEnabled ? info.color : "transparent",
-											borderColor: info.color,
-										}}
-										className={`px-3 py-1.5 rounded-lg text-xs font-medium border-2 transition-all ${
-											isEnabled 
-												? "text-white" 
-												: "text-white/50 hover:text-white/70"
-										}`}
-									>
-										{source === "bountyboard" ? "BountyBoard Jobs" : info.name}
-										{!isEnabled && (
-											<span className="ml-1 opacity-50">(off)</span>
-										)}
-									</button>
-								);
-							})}
-						</div>
+					{/* Divider */}
+					<div className="hidden md:block w-px h-6 bg-white/10" />
+
+					{/* Source Pills */}
+					<div className="flex items-center gap-2 flex-wrap">
+						<span className="text-white/40 text-xs">Sources:</span>
+						{AVAILABLE_SOURCES.map((source) => {
+							const info = SOURCE_INFO[source];
+							const isEnabled = enabledSources.has(source);
+							return (
+								<button
+									key={source}
+									onClick={() => toggleSource(source)}
+									style={{ 
+										backgroundColor: isEnabled ? info.color : "transparent",
+										borderColor: info.color,
+									}}
+									className={`px-2 py-1 rounded text-xs font-medium border transition-all ${
+										isEnabled 
+											? "text-white" 
+											: "text-white/50 hover:text-white/70"
+									}`}
+								>
+									{source === "bountyboard" ? "BountyBoard" : info.name}
+								</button>
+							);
+						})}
 					</div>
 				</div>
 			)}
