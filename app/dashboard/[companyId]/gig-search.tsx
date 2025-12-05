@@ -215,7 +215,7 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 
 			{/* Advanced Search Options */}
 			{showAdvanced && (
-				<div className="mb-6 px-4 py-3 bg-white/5 border border-white/10 rounded-xl flex flex-col md:flex-row md:items-center gap-4">
+				<div className="mb-6 px-4 py-3 bg-white/5 border border-white/10 rounded-xl flex flex-col md:flex-row md:items-center gap-4" data-onboarding="advanced-panel">
 					{/* Location Input */}
 					<div className="flex items-center gap-2">
 						<label className="text-white/40 text-xs whitespace-nowrap">Location:</label>
@@ -233,11 +233,12 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 					<div className="hidden md:block w-px h-6 bg-white/10" />
 
 					{/* Source Pills */}
-					<div className="flex items-center gap-2 flex-wrap">
+					<div className="flex items-center gap-2 flex-wrap" data-onboarding="source-toggles">
 						<span className="text-white/40 text-xs">Sources:</span>
 						{AVAILABLE_SOURCES.map((source) => {
 							const info = SOURCE_INFO[source];
 							const isEnabled = enabledSources.has(source);
+							const isBountyBoard = source === "bountyboard";
 							return (
 								<button
 									key={source}
@@ -251,8 +252,9 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 											? "text-white" 
 											: "text-white/50 hover:text-white/70"
 									}`}
+									data-onboarding={isBountyBoard ? "ai-curated-toggle" : undefined}
 								>
-									{source === "bountyboard" ? "AI Curated" : info.name}
+									{isBountyBoard ? "✦ AI Curated" : info.name}
 								</button>
 							);
 						})}

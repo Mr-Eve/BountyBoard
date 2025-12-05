@@ -8,7 +8,29 @@ interface OnboardingStep {
 	targetSelector?: string; // CSS selector for element to highlight
 	position?: "top" | "bottom" | "left" | "right" | "center";
 	icon?: string;
+	action?: () => void; // Action to perform when entering this step
 }
+
+// Actions that can be performed during onboarding
+const openAdvancedSearch = () => {
+	const advancedBtn = document.querySelector("[data-onboarding='advanced-search']") as HTMLButtonElement;
+	const advancedPanel = document.querySelector("[data-onboarding='advanced-panel']");
+	
+	// Only click if the panel isn't already open
+	if (advancedBtn && !advancedPanel) {
+		advancedBtn.click();
+	}
+};
+
+const closeAdvancedSearch = () => {
+	const advancedBtn = document.querySelector("[data-onboarding='advanced-search']") as HTMLButtonElement;
+	const advancedPanel = document.querySelector("[data-onboarding='advanced-panel']");
+	
+	// Only click if the panel is open
+	if (advancedBtn && advancedPanel) {
+		advancedBtn.click();
+	}
+};
 
 const ADMIN_STEPS: OnboardingStep[] = [
 	{
@@ -16,6 +38,7 @@ const ADMIN_STEPS: OnboardingStep[] = [
 		description:
 			"Your command center for curating freelance opportunities for your community. Let's walk through the key features.",
 		position: "center",
+		action: closeAdvancedSearch, // Ensure advanced search is closed at start
 	},
 	{
 		title: "Search for Gigs",
@@ -28,10 +51,27 @@ const ADMIN_STEPS: OnboardingStep[] = [
 	{
 		title: "Advanced Search Options",
 		description:
-			"Click here to access location filters and toggle different job sources on or off. Enable 'AI Curated' to discover unique business opportunities.",
+			"Click here to access location filters and toggle different job sources. Let's open it to see what's inside.",
 		targetSelector: "[data-onboarding='advanced-search']",
 		position: "bottom",
 		icon: "⚙️",
+	},
+	{
+		title: "✦ AI Curated Results",
+		description:
+			"This is the magic! When enabled, AI Curated searches for local businesses in your area and uses AI to explain exactly how your community's services could help them. These are outreach opportunities, not job postings.",
+		targetSelector: "[data-onboarding='ai-curated-toggle']",
+		position: "bottom",
+		icon: "✦",
+		action: openAdvancedSearch, // Open advanced search to show the toggle
+	},
+	{
+		title: "Job Sources",
+		description:
+			"Toggle these to search different freelance platforms like RemoteOK, Arbeitnow, and Himalayas. Mix and match to find the best opportunities.",
+		targetSelector: "[data-onboarding='source-toggles']",
+		position: "bottom",
+		icon: "🌐",
 	},
 	{
 		title: "Find Gigs Tab",
@@ -40,6 +80,7 @@ const ADMIN_STEPS: OnboardingStep[] = [
 		targetSelector: "[data-onboarding='tab-find']",
 		position: "bottom",
 		icon: "🔍",
+		action: closeAdvancedSearch, // Close advanced search for cleaner view
 	},
 	{
 		title: "Board Tab",
@@ -135,6 +176,17 @@ export function OnboardingModal({ variant, storageKey }: OnboardingProps) {
 		setCurrentStep(0);
 	}, []);
 
+	// Execute action when step changes
+	useEffect(() => {
+		if (isOpen && step.action) {
+			// Small delay to ensure DOM is ready
+			const timer = setTimeout(() => {
+				step.action?.();
+			}, 100);
+			return () => clearTimeout(timer);
+		}
+	}, [isOpen, currentStep, step]);
+
 	// Find and track target element
 	useEffect(() => {
 		if (!isOpen || !step.targetSelector) {
@@ -151,17 +203,22 @@ export function OnboardingModal({ variant, storageKey }: OnboardingProps) {
 			}
 		};
 
-		updateTargetRect();
+		// Delay to allow for DOM updates after actions
+		const timer = setTimeout(updateTargetRect, 150);
+		
 		window.addEventListener("resize", updateTargetRect);
 		window.addEventListener("scroll", updateTargetRect);
 
 		return () => {
+			clearTimeout(timer);
 			window.removeEventListener("resize", updateTargetRect);
 			window.removeEventListener("scroll", updateTargetRect);
 		};
 	}, [isOpen, step.targetSelector, currentStep]);
 
 	const handleClose = useCallback(() => {
+		// Close advanced search if open when closing onboarding
+		closeAdvancedSearch();
 		localStorage.setItem(storageKey, "true");
 		setIsOpen(false);
 		setCurrentStep(0);
@@ -179,6 +236,10 @@ export function OnboardingModal({ variant, storageKey }: OnboardingProps) {
 		if (currentStep > 0) {
 			setCurrentStep(currentStep - 1);
 		}
+	};
+
+	const handleStepClick = (index: number) => {
+		setCurrentStep(index);
 	};
 
 	if (!isOpen) return null;
@@ -296,7 +357,7 @@ export function OnboardingModal({ variant, storageKey }: OnboardingProps) {
 						{steps.map((_, index) => (
 							<button
 								key={index}
-								onClick={() => setCurrentStep(index)}
+								onClick={() => handleStepClick(index)}
 								className={`h-1.5 rounded-full transition-all ${
 									index === currentStep
 										? "w-6 bg-amber-400"
@@ -403,6 +464,16 @@ function OnboardingModalManual({
 	const steps = variant === "admin" ? ADMIN_STEPS : MEMBER_STEPS;
 	const step = steps[currentStep];
 
+	// Execute action when step changes
+	useEffect(() => {
+		if (step.action) {
+			const timer = setTimeout(() => {
+				step.action?.();
+			}, 100);
+			return () => clearTimeout(timer);
+		}
+	}, [currentStep, step]);
+
 	// Find and track target element
 	useEffect(() => {
 		if (!step.targetSelector) {
@@ -419,17 +490,19 @@ function OnboardingModalManual({
 			}
 		};
 
-		updateTargetRect();
+		const timer = setTimeout(updateTargetRect, 150);
 		window.addEventListener("resize", updateTargetRect);
 		window.addEventListener("scroll", updateTargetRect);
 
 		return () => {
+			clearTimeout(timer);
 			window.removeEventListener("resize", updateTargetRect);
 			window.removeEventListener("scroll", updateTargetRect);
 		};
 	}, [step.targetSelector, currentStep]);
 
 	const handleClose = useCallback(() => {
+		closeAdvancedSearch();
 		localStorage.setItem(storageKey, "true");
 		setCurrentStep(0);
 		onClose();
@@ -447,6 +520,10 @@ function OnboardingModalManual({
 		if (currentStep > 0) {
 			setCurrentStep(currentStep - 1);
 		}
+	};
+
+	const handleStepClick = (index: number) => {
+		setCurrentStep(index);
 	};
 
 	const isLastStep = currentStep === steps.length - 1;
@@ -554,7 +631,7 @@ function OnboardingModalManual({
 						{steps.map((_, index) => (
 							<button
 								key={index}
-								onClick={() => setCurrentStep(index)}
+								onClick={() => handleStepClick(index)}
 								className={`h-1.5 rounded-full transition-all ${
 									index === currentStep
 										? "w-6 bg-amber-400"
