@@ -136,27 +136,27 @@ function CuratedGigCard({
 	const isBountyBoard = gig.source === "bountyboard";
 
 	return (
-		<div className={`group relative bg-white/5 hover:bg-white/[0.07] border ${pinned ? "border-amber-500/50" : "border-white/10"} hover:border-amber-500/30 rounded-2xl p-6 transition-all`}>
+		<div className="group relative bg-white/5 hover:bg-white/[0.07] border border-white/10 hover:border-amber-500/30 rounded-2xl p-6 transition-all">
 			{/* Glow effect on hover */}
 			<div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-amber-500/0 to-orange-500/0 group-hover:from-amber-500/5 group-hover:to-orange-500/5 transition-all" />
-
-			{/* Pinned indicator */}
-			{pinned && (
-				<div className="absolute -top-2 -right-2 bg-amber-500 text-black text-xs font-bold px-2 py-1 rounded-lg">
-					📌 Pinned
-				</div>
-			)}
 
 			<div className="relative">
 				{/* Header */}
 				<div className="flex items-start justify-between gap-4 mb-4">
-					<span
-						style={{ backgroundColor: source.color }}
-						className="px-3 py-1 rounded-lg text-white text-xs font-medium flex items-center gap-1"
-					>
-						{isBountyBoard && <span>✦</span>}
-						{isBountyBoard ? "AI Curated" : source.name}
-					</span>
+					<div className="flex items-center gap-2">
+						<span
+							style={{ backgroundColor: source.color }}
+							className="px-3 py-1 rounded-lg text-white text-xs font-medium flex items-center gap-1"
+						>
+							{isBountyBoard && <span>✦</span>}
+							{isBountyBoard ? "AI Curated" : source.name}
+						</span>
+						{pinned && (
+							<span className="px-3 py-1 rounded-lg border border-amber-500 text-amber-500 text-xs font-medium">
+								Pinned
+							</span>
+						)}
+					</div>
 					{gig.clientInfo?.rating && (
 						<span className="px-2 py-1 bg-amber-500/20 text-amber-400 rounded-lg text-xs font-medium">
 							{gig.clientInfo.rating} stars
@@ -253,11 +253,7 @@ function CuratedGigCard({
 								<button
 									onClick={onTogglePin}
 									disabled={isUpdating}
-									className={`px-4 py-2.5 rounded-xl transition-all disabled:opacity-50 text-sm font-medium ${
-										pinned
-											? "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
-											: "bg-white/10 text-white/70 hover:bg-white/20 hover:text-white"
-									}`}
+									className="px-4 py-2.5 bg-white/10 text-white/70 hover:bg-white/20 hover:text-white rounded-xl transition-all disabled:opacity-50 text-sm font-medium"
 								>
 									{isUpdating ? "..." : pinned ? "Unpin" : "Pin"}
 								</button>
@@ -277,7 +273,7 @@ function CuratedGigCard({
 								<button
 									onClick={() => onUpdateStatus("approved")}
 									disabled={isUpdating}
-									className="px-4 py-2.5 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 rounded-xl transition-all disabled:opacity-50 text-sm font-medium"
+									className="px-4 py-2.5 bg-white/10 text-white/70 hover:bg-white/20 hover:text-white rounded-xl transition-all disabled:opacity-50 text-sm font-medium"
 								>
 									{isUpdating ? "..." : "Add"}
 								</button>

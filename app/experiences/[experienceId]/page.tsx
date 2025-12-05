@@ -26,6 +26,13 @@ export default async function ExperiencePage({
 	// Get approved gigs for members
 	const gigs = await getApprovedGigs(companyId);
 
+	// Sort gigs: pinned first, then by date
+	const sortedGigs = [...gigs].sort((a, b) => {
+		if (a.pinned && !b.pinned) return -1;
+		if (!a.pinned && b.pinned) return 1;
+		return new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime();
+	});
+
 	const displayName = user.name || `@${user.username}`;
 
 	return (
@@ -69,7 +76,7 @@ export default async function ExperiencePage({
 					<EmptyState />
 				) : (
 					<div className="grid md:grid-cols-2 gap-5">
-						{gigs.map((curatedGig) => (
+						{sortedGigs.map((curatedGig) => (
 							<GigCard
 								key={curatedGig.id}
 								curatedGig={curatedGig}
@@ -83,7 +90,7 @@ export default async function ExperiencePage({
 }
 
 function GigCard({ curatedGig }: { curatedGig: CuratedGig }) {
-	const { gig, customReward, notes, aiSummary } = curatedGig;
+	const { gig, customReward, notes, aiSummary, pinned } = curatedGig;
 	const source = SOURCE_INFO[gig.source];
 	const isBountyBoard = gig.source === "bountyboard";
 
@@ -95,13 +102,20 @@ function GigCard({ curatedGig }: { curatedGig: CuratedGig }) {
 			<div className="relative">
 				{/* Header */}
 				<div className="flex items-start justify-between gap-4 mb-4">
-					<span
-						style={{ backgroundColor: source.color }}
-						className="px-3 py-1 rounded-lg text-white text-xs font-medium flex items-center gap-1"
-					>
-						{isBountyBoard && <span>✦</span>}
-						{isBountyBoard ? "AI Curated" : source.name}
-					</span>
+					<div className="flex items-center gap-2">
+						<span
+							style={{ backgroundColor: source.color }}
+							className="px-3 py-1 rounded-lg text-white text-xs font-medium flex items-center gap-1"
+						>
+							{isBountyBoard && <span>✦</span>}
+							{isBountyBoard ? "AI Curated" : source.name}
+						</span>
+						{pinned && (
+							<span className="px-3 py-1 rounded-lg border border-amber-500 text-amber-500 text-xs font-medium">
+								Pinned
+							</span>
+						)}
+					</div>
 					{gig.clientInfo?.rating && (
 						<span className="px-2 py-1 bg-amber-500/20 text-amber-400 rounded-lg text-xs font-medium">
 							{gig.clientInfo.rating} stars
