@@ -400,8 +400,9 @@ function GigResultCard({
 			<div className="flex items-center justify-between gap-2 mb-3">
 				<span
 					style={{ backgroundColor: source.color }}
-					className="px-2.5 py-1 rounded-md text-xs font-medium text-white"
+					className="px-2.5 py-1 rounded-md text-xs font-medium text-white flex items-center gap-1"
 				>
+					{isBountyBoard && <span>✦</span>}
 					{isBountyBoard ? "AI Curated" : source.name}
 				</span>
 				{isBountyBoard ? (
