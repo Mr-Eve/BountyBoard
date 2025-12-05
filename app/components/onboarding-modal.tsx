@@ -1,172 +1,171 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Image from "next/image";
+import { useState, useEffect, useCallback } from "react";
 
 interface OnboardingStep {
 	title: string;
 	description: string;
-	icon: React.ReactNode;
-	highlight?: string;
+	targetSelector?: string; // CSS selector for element to highlight
+	position?: "top" | "bottom" | "left" | "right" | "center";
+	icon?: string;
 }
 
 const ADMIN_STEPS: OnboardingStep[] = [
 	{
-		title: "Welcome to Bounty Board",
+		title: "Welcome to Bounty Board! 🎯",
 		description:
 			"Your command center for curating freelance opportunities for your community. Let's walk through the key features.",
-		icon: (
-			<div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-xl shadow-amber-500/30">
-				<span className="text-3xl">🎯</span>
-			</div>
-		),
+		position: "center",
 	},
 	{
 		title: "Search for Gigs",
 		description:
-			"Use the search bar to find freelance opportunities across multiple platforms like Upwork, Freelancer, and more. Filter by location and toggle different sources on or off.",
-		icon: (
-			<div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center shadow-xl shadow-blue-500/30">
-				<span className="text-3xl">🔍</span>
-			</div>
-		),
-		highlight: "Find Gigs tab",
+			"Type a service or skill (like 'web design' or 'SEO') and hit Search to find opportunities across multiple freelance platforms.",
+		targetSelector: "[data-onboarding='search-input']",
+		position: "bottom",
+		icon: "🔍",
 	},
 	{
-		title: "AI Curated Opportunities",
+		title: "Advanced Search Options",
 		description:
-			"Enable \"AI Curated\" in the search to discover unique service opportunities. Our AI analyzes local businesses and suggests how your community members could help them based on their reviews and needs.",
-		icon: (
-			<div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center shadow-xl shadow-pink-500/30">
-				<span className="text-3xl">✦</span>
-			</div>
-		),
-		highlight: "AI Curated toggle",
+			"Click here to access location filters and toggle different job sources on or off. Enable 'AI Curated' to discover unique business opportunities.",
+		targetSelector: "[data-onboarding='advanced-search']",
+		position: "bottom",
+		icon: "⚙️",
 	},
 	{
-		title: "Save & Add to Board",
+		title: "Find Gigs Tab",
 		description:
-			"Found a great gig? Click \"Save\" to review it later, or \"Add to Board\" to immediately share it with your community. Saved gigs appear in the Saved tab.",
-		icon: (
-			<div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-xl shadow-emerald-500/30">
-				<span className="text-3xl">📌</span>
-			</div>
-		),
-		highlight: "Save & Add buttons",
+			"This is where you search for new opportunities. Results from various platforms will appear here after searching.",
+		targetSelector: "[data-onboarding='tab-find']",
+		position: "bottom",
+		icon: "🔍",
 	},
 	{
-		title: "Manage Your Board",
+		title: "Board Tab",
 		description:
-			"The Board tab shows all approved gigs visible to your members. Pin important gigs to keep them at the top, or remove outdated ones. Your members will see exactly what you curate.",
-		icon: (
-			<div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-xl shadow-amber-500/30">
-				<span className="text-3xl">📋</span>
-			</div>
-		),
-		highlight: "Board tab",
+			"Approved gigs appear here and are visible to your community members. This is what your members will see.",
+		targetSelector: "[data-onboarding='tab-board']",
+		position: "bottom",
+		icon: "📋",
 	},
 	{
-		title: "You're All Set!",
+		title: "Saved Tab",
 		description:
-			"Start searching for opportunities and build a curated board that helps your community members find their next gig. You can always access this guide from the help button.",
-		icon: (
-			<div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-xl shadow-amber-500/30">
-				<span className="text-3xl">🚀</span>
-			</div>
-		),
+			"Gigs you save for later go here. Review them when you're ready and add the best ones to your Board.",
+		targetSelector: "[data-onboarding='tab-saved']",
+		position: "bottom",
+		icon: "💾",
+	},
+	{
+		title: "You're Ready!",
+		description:
+			"Start by searching for a service your community offers. Click the ? button anytime to see this guide again.",
+		position: "center",
+		icon: "🚀",
 	},
 ];
 
 const MEMBER_STEPS: OnboardingStep[] = [
 	{
-		title: "Welcome to Bounty Board",
+		title: "Welcome to Bounty Board! 🎯",
 		description:
-			"Your community leaders have curated freelance opportunities just for you. Let's show you how to make the most of it.",
-		icon: (
-			<div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-xl shadow-amber-500/30">
-				<span className="text-3xl">🎯</span>
-			</div>
-		),
+			"Your community leaders have curated freelance opportunities just for you. Let's show you how to find your next gig.",
+		position: "center",
 	},
 	{
-		title: "Browse Curated Gigs",
+		title: "Search Curated Gigs",
 		description:
-			"All the opportunities you see have been hand-picked by your community leaders. Each gig includes details about the project, required skills, and budget.",
-		icon: (
-			<div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center shadow-xl shadow-blue-500/30">
-				<span className="text-3xl">📋</span>
-			</div>
-		),
+			"Use this search bar to filter through all the curated opportunities. Search by title, skills, location, or keywords.",
+		targetSelector: "[data-onboarding='member-search']",
+		position: "bottom",
+		icon: "🔍",
+	},
+	{
+		title: "Gig Cards",
+		description:
+			"Each card shows a curated opportunity with details about the project, required skills, and budget. Look for the source tag to see where it came from.",
+		targetSelector: "[data-onboarding='gig-card']",
+		position: "top",
+		icon: "📋",
 	},
 	{
 		title: "AI Curated Opportunities",
 		description:
-			"Gigs marked with ✦ AI Curated are special opportunities discovered by AI. These analyze local businesses and explain exactly how you could help them with your skills.",
-		icon: (
-			<div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center shadow-xl shadow-pink-500/30">
-				<span className="text-3xl">✦</span>
-			</div>
-		),
-		highlight: "Pink summary boxes",
+			"Gigs with the ✦ AI Curated tag are special! These are local businesses that could use your services. The pink box explains exactly how you can help them.",
+		targetSelector: "[data-onboarding='ai-curated']",
+		position: "top",
+		icon: "✦",
 	},
 	{
 		title: "Pinned Gigs",
 		description:
-			"Look for gigs with a gold \"Pinned\" tag - these are highlighted by your community leaders as particularly good opportunities worth checking out first.",
-		icon: (
-			<div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center shadow-xl shadow-amber-500/30">
-				<span className="text-3xl">📌</span>
-			</div>
-		),
-		highlight: "Pinned tag",
-	},
-	{
-		title: "Search & Filter",
-		description:
-			"Use the search bar to find specific gigs by title, skills, location, or keywords. It searches through all the curated opportunities instantly.",
-		icon: (
-			<div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-xl shadow-emerald-500/30">
-				<span className="text-3xl">🔍</span>
-			</div>
-		),
-		highlight: "Search bar",
+			"Gigs with a gold 'Pinned' tag are highlighted by your community leaders as especially good opportunities. Check these first!",
+		targetSelector: "[data-onboarding='pinned-tag']",
+		position: "top",
+		icon: "📌",
 	},
 	{
 		title: "Apply for Gigs",
 		description:
-			"Found something interesting? Click \"Apply Now\" to go directly to the original posting and submit your application. Good luck!",
-		icon: (
-			<div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-xl shadow-amber-500/30">
-				<span className="text-3xl">🚀</span>
-			</div>
-		),
+			"Found something interesting? Click 'Apply Now' to go directly to the original posting and submit your application. Good luck!",
+		targetSelector: "[data-onboarding='apply-button']",
+		position: "top",
+		icon: "🚀",
 	},
 ];
 
-interface OnboardingModalProps {
+interface OnboardingProps {
 	variant: "admin" | "member";
 	storageKey: string;
 }
 
-export function OnboardingModal({ variant, storageKey }: OnboardingModalProps) {
+export function OnboardingModal({ variant, storageKey }: OnboardingProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const [currentStep, setCurrentStep] = useState(0);
+	const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
 
 	const steps = variant === "admin" ? ADMIN_STEPS : MEMBER_STEPS;
+	const step = steps[currentStep];
 
+	// Always show on reload for testing
 	useEffect(() => {
-		// Check if user has seen onboarding
-		const hasSeenOnboarding = localStorage.getItem(storageKey);
-		if (!hasSeenOnboarding) {
-			setIsOpen(true);
-		}
-	}, [storageKey]);
+		// For testing: always show onboarding
+		setIsOpen(true);
+		setCurrentStep(0);
+	}, []);
 
-	const handleClose = () => {
+	// Find and track target element
+	useEffect(() => {
+		if (!isOpen || !step.targetSelector) {
+			setTargetRect(null);
+			return;
+		}
+
+		const updateTargetRect = () => {
+			const target = document.querySelector(step.targetSelector!);
+			if (target) {
+				setTargetRect(target.getBoundingClientRect());
+			} else {
+				setTargetRect(null);
+			}
+		};
+
+		updateTargetRect();
+		window.addEventListener("resize", updateTargetRect);
+		window.addEventListener("scroll", updateTargetRect);
+
+		return () => {
+			window.removeEventListener("resize", updateTargetRect);
+			window.removeEventListener("scroll", updateTargetRect);
+		};
+	}, [isOpen, step.targetSelector, currentStep]);
+
+	const handleClose = useCallback(() => {
 		localStorage.setItem(storageKey, "true");
 		setIsOpen(false);
 		setCurrentStep(0);
-	};
+	}, [storageKey]);
 
 	const handleNext = () => {
 		if (currentStep < steps.length - 1) {
@@ -182,28 +181,108 @@ export function OnboardingModal({ variant, storageKey }: OnboardingModalProps) {
 		}
 	};
 
-	const handleSkip = () => {
-		handleClose();
-	};
-
 	if (!isOpen) return null;
 
-	const step = steps[currentStep];
 	const isLastStep = currentStep === steps.length - 1;
 	const isFirstStep = currentStep === 0;
+	const isCentered = step.position === "center" || !targetRect;
+
+	// Calculate info box position based on target element
+	const getInfoBoxStyle = (): React.CSSProperties => {
+		if (isCentered) {
+			return {
+				position: "fixed",
+				top: "50%",
+				left: "50%",
+				transform: "translate(-50%, -50%)",
+			};
+		}
+
+		const padding = 16;
+		const boxWidth = 380;
+		const boxHeight = 200; // approximate
+
+		let top = 0;
+		let left = 0;
+
+		switch (step.position) {
+			case "bottom":
+				top = targetRect!.bottom + padding;
+				left = targetRect!.left + targetRect!.width / 2 - boxWidth / 2;
+				break;
+			case "top":
+				top = targetRect!.top - boxHeight - padding;
+				left = targetRect!.left + targetRect!.width / 2 - boxWidth / 2;
+				break;
+			case "left":
+				top = targetRect!.top + targetRect!.height / 2 - boxHeight / 2;
+				left = targetRect!.left - boxWidth - padding;
+				break;
+			case "right":
+				top = targetRect!.top + targetRect!.height / 2 - boxHeight / 2;
+				left = targetRect!.right + padding;
+				break;
+		}
+
+		// Keep within viewport
+		left = Math.max(padding, Math.min(left, window.innerWidth - boxWidth - padding));
+		top = Math.max(padding, Math.min(top, window.innerHeight - boxHeight - padding));
+
+		return {
+			position: "fixed",
+			top: `${top}px`,
+			left: `${left}px`,
+		};
+	};
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-			{/* Backdrop */}
-			<div
-				className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-				onClick={handleSkip}
-			/>
+		<div className="fixed inset-0 z-[100]">
+			{/* Backdrop with spotlight cutout */}
+			<svg className="absolute inset-0 w-full h-full">
+				<defs>
+					<mask id="spotlight-mask">
+						<rect width="100%" height="100%" fill="white" />
+						{targetRect && (
+							<rect
+								x={targetRect.left - 8}
+								y={targetRect.top - 8}
+								width={targetRect.width + 16}
+								height={targetRect.height + 16}
+								rx="12"
+								fill="black"
+							/>
+						)}
+					</mask>
+				</defs>
+				<rect
+					width="100%"
+					height="100%"
+					fill="rgba(0, 0, 0, 0.85)"
+					mask="url(#spotlight-mask)"
+				/>
+			</svg>
 
-			{/* Modal */}
-			<div className="relative w-full max-w-lg bg-[#111113] border border-white/10 rounded-3xl shadow-2xl overflow-hidden">
+			{/* Spotlight border glow */}
+			{targetRect && (
+				<div
+					className="absolute border-2 border-amber-400 rounded-xl pointer-events-none"
+					style={{
+						left: targetRect.left - 8,
+						top: targetRect.top - 8,
+						width: targetRect.width + 16,
+						height: targetRect.height + 16,
+						boxShadow: "0 0 20px rgba(251, 191, 36, 0.5), 0 0 40px rgba(251, 191, 36, 0.3)",
+					}}
+				/>
+			)}
+
+			{/* Info Box */}
+			<div
+				style={getInfoBoxStyle()}
+				className="w-[380px] bg-[#18181b] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-10"
+			>
 				{/* Progress bar */}
-				<div className="absolute top-0 left-0 right-0 h-1 bg-white/5">
+				<div className="h-1 bg-white/5">
 					<div
 						className="h-full bg-gradient-to-r from-amber-400 to-orange-500 transition-all duration-300"
 						style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
@@ -211,69 +290,64 @@ export function OnboardingModal({ variant, storageKey }: OnboardingModalProps) {
 				</div>
 
 				{/* Content */}
-				<div className="p-8 pt-10">
-					{/* Step indicator */}
-					<div className="flex items-center justify-center gap-2 mb-6">
+				<div className="p-6">
+					{/* Step indicator dots */}
+					<div className="flex items-center justify-center gap-1.5 mb-4">
 						{steps.map((_, index) => (
 							<button
 								key={index}
 								onClick={() => setCurrentStep(index)}
-								className={`w-2 h-2 rounded-full transition-all ${
+								className={`h-1.5 rounded-full transition-all ${
 									index === currentStep
 										? "w-6 bg-amber-400"
 										: index < currentStep
-											? "bg-amber-400/50"
-											: "bg-white/20"
+											? "w-1.5 bg-amber-400/50"
+											: "w-1.5 bg-white/20"
 								}`}
 							/>
 						))}
 					</div>
 
-					{/* Icon */}
-					<div className="flex justify-center mb-6">{step.icon}</div>
-
-					{/* Title */}
-					<h2 className="text-2xl font-bold text-white text-center mb-3">
-						{step.title}
-					</h2>
+					{/* Icon & Title */}
+					<div className="flex items-center gap-3 mb-3">
+						{step.icon && (
+							<span className="text-2xl">{step.icon}</span>
+						)}
+						<h2 className="text-lg font-bold text-white">
+							{step.title}
+						</h2>
+					</div>
 
 					{/* Description */}
-					<p className="text-white/60 text-center leading-relaxed mb-2">
+					<p className="text-white/60 text-sm leading-relaxed mb-5">
 						{step.description}
 					</p>
 
-					{/* Highlight hint */}
-					{step.highlight && (
-						<p className="text-amber-400/80 text-sm text-center">
-							💡 Look for: {step.highlight}
-						</p>
-					)}
-				</div>
-
-				{/* Footer */}
-				<div className="px-8 pb-8 flex items-center justify-between">
-					<button
-						onClick={handleSkip}
-						className="px-4 py-2 text-white/50 hover:text-white/70 text-sm transition-colors"
-					>
-						Skip tour
-					</button>
-
-					<div className="flex items-center gap-3">
-						{!isFirstStep && (
-							<button
-								onClick={handlePrev}
-								className="px-5 py-2.5 bg-white/10 text-white/70 hover:bg-white/20 hover:text-white rounded-xl text-sm font-medium transition-all"
-							>
-								Back
-							</button>
-						)}
+					{/* Navigation */}
+					<div className="flex items-center justify-between">
 						<button
-							onClick={handleNext}
-							className="px-5 py-2.5 bg-gradient-to-r from-amber-400 to-orange-500 text-black rounded-xl text-sm font-medium hover:from-amber-300 hover:to-orange-400 transition-all"
+							onClick={handleClose}
+							className="text-white/40 hover:text-white/60 text-sm transition-colors"
 						>
-							{isLastStep ? "Get Started" : "Next"}
+							Skip tour
 						</button>
+
+						<div className="flex items-center gap-2">
+							{!isFirstStep && (
+								<button
+									onClick={handlePrev}
+									className="px-4 py-2 bg-white/10 text-white/70 hover:bg-white/20 hover:text-white rounded-lg text-sm font-medium transition-all"
+								>
+									Back
+								</button>
+							)}
+							<button
+								onClick={handleNext}
+								className="px-4 py-2 bg-gradient-to-r from-amber-400 to-orange-500 text-black rounded-lg text-sm font-medium hover:from-amber-300 hover:to-orange-400 transition-all"
+							>
+								{isLastStep ? "Get Started" : "Next"}
+							</button>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -282,21 +356,13 @@ export function OnboardingModal({ variant, storageKey }: OnboardingModalProps) {
 }
 
 // Help button component to re-open onboarding
-export function OnboardingHelpButton({
-	variant,
-	storageKey,
-}: OnboardingModalProps) {
+export function OnboardingHelpButton({ variant, storageKey }: OnboardingProps) {
 	const [showModal, setShowModal] = useState(false);
-
-	const handleOpen = () => {
-		localStorage.removeItem(storageKey);
-		setShowModal(true);
-	};
 
 	return (
 		<>
 			<button
-				onClick={handleOpen}
+				onClick={() => setShowModal(true)}
 				className="fixed bottom-6 right-6 w-12 h-12 bg-white/10 hover:bg-white/20 border border-white/10 rounded-full flex items-center justify-center text-white/70 hover:text-white transition-all shadow-lg z-40"
 				title="Show guide"
 			>
@@ -315,7 +381,7 @@ export function OnboardingHelpButton({
 				</svg>
 			</button>
 			{showModal && (
-				<OnboardingModalWrapper
+				<OnboardingModalManual
 					variant={variant}
 					storageKey={storageKey}
 					onClose={() => setShowModal(false)}
@@ -325,21 +391,49 @@ export function OnboardingHelpButton({
 	);
 }
 
-// Wrapper for manually triggered modal
-function OnboardingModalWrapper({
+// Manual trigger version
+function OnboardingModalManual({
 	variant,
 	storageKey,
 	onClose,
-}: OnboardingModalProps & { onClose: () => void }) {
+}: OnboardingProps & { onClose: () => void }) {
 	const [currentStep, setCurrentStep] = useState(0);
+	const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
 
 	const steps = variant === "admin" ? ADMIN_STEPS : MEMBER_STEPS;
+	const step = steps[currentStep];
 
-	const handleClose = () => {
+	// Find and track target element
+	useEffect(() => {
+		if (!step.targetSelector) {
+			setTargetRect(null);
+			return;
+		}
+
+		const updateTargetRect = () => {
+			const target = document.querySelector(step.targetSelector!);
+			if (target) {
+				setTargetRect(target.getBoundingClientRect());
+			} else {
+				setTargetRect(null);
+			}
+		};
+
+		updateTargetRect();
+		window.addEventListener("resize", updateTargetRect);
+		window.addEventListener("scroll", updateTargetRect);
+
+		return () => {
+			window.removeEventListener("resize", updateTargetRect);
+			window.removeEventListener("scroll", updateTargetRect);
+		};
+	}, [step.targetSelector, currentStep]);
+
+	const handleClose = useCallback(() => {
 		localStorage.setItem(storageKey, "true");
 		setCurrentStep(0);
 		onClose();
-	};
+	}, [storageKey, onClose]);
 
 	const handleNext = () => {
 		if (currentStep < steps.length - 1) {
@@ -355,96 +449,159 @@ function OnboardingModalWrapper({
 		}
 	};
 
-	const step = steps[currentStep];
 	const isLastStep = currentStep === steps.length - 1;
 	const isFirstStep = currentStep === 0;
+	const isCentered = step.position === "center" || !targetRect;
+
+	const getInfoBoxStyle = (): React.CSSProperties => {
+		if (isCentered) {
+			return {
+				position: "fixed",
+				top: "50%",
+				left: "50%",
+				transform: "translate(-50%, -50%)",
+			};
+		}
+
+		const padding = 16;
+		const boxWidth = 380;
+		const boxHeight = 200;
+
+		let top = 0;
+		let left = 0;
+
+		switch (step.position) {
+			case "bottom":
+				top = targetRect!.bottom + padding;
+				left = targetRect!.left + targetRect!.width / 2 - boxWidth / 2;
+				break;
+			case "top":
+				top = targetRect!.top - boxHeight - padding;
+				left = targetRect!.left + targetRect!.width / 2 - boxWidth / 2;
+				break;
+			case "left":
+				top = targetRect!.top + targetRect!.height / 2 - boxHeight / 2;
+				left = targetRect!.left - boxWidth - padding;
+				break;
+			case "right":
+				top = targetRect!.top + targetRect!.height / 2 - boxHeight / 2;
+				left = targetRect!.right + padding;
+				break;
+		}
+
+		left = Math.max(padding, Math.min(left, window.innerWidth - boxWidth - padding));
+		top = Math.max(padding, Math.min(top, window.innerHeight - boxHeight - padding));
+
+		return {
+			position: "fixed",
+			top: `${top}px`,
+			left: `${left}px`,
+		};
+	};
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-			{/* Backdrop */}
-			<div
-				className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-				onClick={handleClose}
-			/>
+		<div className="fixed inset-0 z-[100]">
+			<svg className="absolute inset-0 w-full h-full">
+				<defs>
+					<mask id="spotlight-mask-manual">
+						<rect width="100%" height="100%" fill="white" />
+						{targetRect && (
+							<rect
+								x={targetRect.left - 8}
+								y={targetRect.top - 8}
+								width={targetRect.width + 16}
+								height={targetRect.height + 16}
+								rx="12"
+								fill="black"
+							/>
+						)}
+					</mask>
+				</defs>
+				<rect
+					width="100%"
+					height="100%"
+					fill="rgba(0, 0, 0, 0.85)"
+					mask="url(#spotlight-mask-manual)"
+				/>
+			</svg>
 
-			{/* Modal */}
-			<div className="relative w-full max-w-lg bg-[#111113] border border-white/10 rounded-3xl shadow-2xl overflow-hidden">
-				{/* Progress bar */}
-				<div className="absolute top-0 left-0 right-0 h-1 bg-white/5">
+			{targetRect && (
+				<div
+					className="absolute border-2 border-amber-400 rounded-xl pointer-events-none"
+					style={{
+						left: targetRect.left - 8,
+						top: targetRect.top - 8,
+						width: targetRect.width + 16,
+						height: targetRect.height + 16,
+						boxShadow: "0 0 20px rgba(251, 191, 36, 0.5), 0 0 40px rgba(251, 191, 36, 0.3)",
+					}}
+				/>
+			)}
+
+			<div
+				style={getInfoBoxStyle()}
+				className="w-[380px] bg-[#18181b] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-10"
+			>
+				<div className="h-1 bg-white/5">
 					<div
 						className="h-full bg-gradient-to-r from-amber-400 to-orange-500 transition-all duration-300"
 						style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
 					/>
 				</div>
 
-				{/* Content */}
-				<div className="p-8 pt-10">
-					{/* Step indicator */}
-					<div className="flex items-center justify-center gap-2 mb-6">
+				<div className="p-6">
+					<div className="flex items-center justify-center gap-1.5 mb-4">
 						{steps.map((_, index) => (
 							<button
 								key={index}
 								onClick={() => setCurrentStep(index)}
-								className={`w-2 h-2 rounded-full transition-all ${
+								className={`h-1.5 rounded-full transition-all ${
 									index === currentStep
 										? "w-6 bg-amber-400"
 										: index < currentStep
-											? "bg-amber-400/50"
-											: "bg-white/20"
+											? "w-1.5 bg-amber-400/50"
+											: "w-1.5 bg-white/20"
 								}`}
 							/>
 						))}
 					</div>
 
-					{/* Icon */}
-					<div className="flex justify-center mb-6">{step.icon}</div>
+					<div className="flex items-center gap-3 mb-3">
+						{step.icon && <span className="text-2xl">{step.icon}</span>}
+						<h2 className="text-lg font-bold text-white">{step.title}</h2>
+					</div>
 
-					{/* Title */}
-					<h2 className="text-2xl font-bold text-white text-center mb-3">
-						{step.title}
-					</h2>
-
-					{/* Description */}
-					<p className="text-white/60 text-center leading-relaxed mb-2">
+					<p className="text-white/60 text-sm leading-relaxed mb-5">
 						{step.description}
 					</p>
 
-					{/* Highlight hint */}
-					{step.highlight && (
-						<p className="text-amber-400/80 text-sm text-center">
-							💡 Look for: {step.highlight}
-						</p>
-					)}
-				</div>
-
-				{/* Footer */}
-				<div className="px-8 pb-8 flex items-center justify-between">
-					<button
-						onClick={handleClose}
-						className="px-4 py-2 text-white/50 hover:text-white/70 text-sm transition-colors"
-					>
-						Close
-					</button>
-
-					<div className="flex items-center gap-3">
-						{!isFirstStep && (
-							<button
-								onClick={handlePrev}
-								className="px-5 py-2.5 bg-white/10 text-white/70 hover:bg-white/20 hover:text-white rounded-xl text-sm font-medium transition-all"
-							>
-								Back
-							</button>
-						)}
+					<div className="flex items-center justify-between">
 						<button
-							onClick={handleNext}
-							className="px-5 py-2.5 bg-gradient-to-r from-amber-400 to-orange-500 text-black rounded-xl text-sm font-medium hover:from-amber-300 hover:to-orange-400 transition-all"
+							onClick={handleClose}
+							className="text-white/40 hover:text-white/60 text-sm transition-colors"
 						>
-							{isLastStep ? "Done" : "Next"}
+							Close
 						</button>
+
+						<div className="flex items-center gap-2">
+							{!isFirstStep && (
+								<button
+									onClick={handlePrev}
+									className="px-4 py-2 bg-white/10 text-white/70 hover:bg-white/20 hover:text-white rounded-lg text-sm font-medium transition-all"
+								>
+									Back
+								</button>
+							)}
+							<button
+								onClick={handleNext}
+								className="px-4 py-2 bg-gradient-to-r from-amber-400 to-orange-500 text-black rounded-lg text-sm font-medium hover:from-amber-300 hover:to-orange-400 transition-all"
+							>
+								{isLastStep ? "Done" : "Next"}
+							</button>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 	);
 }
-

@@ -154,7 +154,7 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 			</p>
 
 			{/* Search Inputs */}
-			<div className="flex flex-col md:flex-row gap-3 mb-4">
+			<div className="flex flex-col md:flex-row gap-3 mb-4" data-onboarding="search-input">
 				<div className="flex-1 relative">
 					<input
 						type="text"
@@ -200,6 +200,7 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 			<button
 				onClick={() => setShowAdvanced(!showAdvanced)}
 				className="flex items-center gap-2 text-white/50 hover:text-white/70 text-sm mb-4 transition-colors"
+				data-onboarding="advanced-search"
 			>
 				<svg
 					className={`w-4 h-4 transition-transform ${showAdvanced ? "rotate-90" : ""}`}

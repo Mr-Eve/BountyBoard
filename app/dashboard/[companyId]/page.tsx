@@ -63,13 +63,13 @@ export default async function DashboardPage({
 			<div className="border-b border-white/10">
 				<div className="max-w-7xl mx-auto px-6">
 					<nav className="flex gap-1">
-						<TabLink href={`/dashboard/${companyId}`} active>
+						<TabLink href={`/dashboard/${companyId}`} active data-onboarding="tab-find">
 							Find Gigs
 						</TabLink>
-						<TabLink href={`/dashboard/${companyId}/curated`}>
+						<TabLink href={`/dashboard/${companyId}/curated`} data-onboarding="tab-board">
 							Board ({approvedCount})
 						</TabLink>
-						<TabLink href={`/dashboard/${companyId}/pending`}>
+						<TabLink href={`/dashboard/${companyId}/pending`} data-onboarding="tab-saved">
 							Saved ({pendingCount})
 						</TabLink>
 					</nav>
@@ -88,14 +88,17 @@ function TabLink({
 	href,
 	active,
 	children,
+	"data-onboarding": dataOnboarding,
 }: {
 	href: string;
 	active?: boolean;
 	children: React.ReactNode;
+	"data-onboarding"?: string;
 }) {
 	return (
 		<Link
 			href={href}
+			data-onboarding={dataOnboarding}
 			className={`px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-[1px] ${
 				active
 					? "text-amber-400 border-amber-400"

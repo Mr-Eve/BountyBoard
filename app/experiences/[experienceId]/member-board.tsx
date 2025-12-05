@@ -44,7 +44,7 @@ export function MemberBoard({ gigs }: MemberBoardProps) {
 			<OnboardingHelpButton variant="member" storageKey="bountyboard-member-onboarding" />
 
 			{/* Search Bar */}
-			<div className="mb-6">
+			<div className="mb-6" data-onboarding="member-search">
 				<div className="relative">
 					<svg
 						className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40"
@@ -101,8 +101,8 @@ export function MemberBoard({ gigs }: MemberBoardProps) {
 				)
 			) : (
 				<div className="grid md:grid-cols-2 gap-5">
-					{filteredGigs.map((curatedGig) => (
-						<GigCard key={curatedGig.id} curatedGig={curatedGig} />
+					{filteredGigs.map((curatedGig, index) => (
+						<GigCard key={curatedGig.id} curatedGig={curatedGig} isFirst={index === 0} />
 					))}
 				</div>
 			)}
@@ -110,13 +110,16 @@ export function MemberBoard({ gigs }: MemberBoardProps) {
 	);
 }
 
-function GigCard({ curatedGig }: { curatedGig: CuratedGig }) {
+function GigCard({ curatedGig, isFirst = false }: { curatedGig: CuratedGig; isFirst?: boolean }) {
 	const { gig, customReward, notes, aiSummary, pinned } = curatedGig;
 	const source = SOURCE_INFO[gig.source];
 	const isBountyBoard = gig.source === "bountyboard";
 
 	return (
-		<div className="group relative bg-white/5 hover:bg-white/[0.07] border border-white/10 hover:border-amber-500/30 rounded-2xl p-6 transition-all">
+		<div 
+			className="group relative bg-white/5 hover:bg-white/[0.07] border border-white/10 hover:border-amber-500/30 rounded-2xl p-6 transition-all"
+			data-onboarding={isFirst ? "gig-card" : undefined}
+		>
 			{/* Glow effect on hover */}
 			<div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-amber-500/0 to-orange-500/0 group-hover:from-amber-500/5 group-hover:to-orange-500/5 transition-all" />
 
@@ -127,12 +130,16 @@ function GigCard({ curatedGig }: { curatedGig: CuratedGig }) {
 						<span
 							style={{ backgroundColor: source.color }}
 							className="px-3 py-1 rounded-lg text-white text-xs font-medium flex items-center gap-1"
+							data-onboarding={isFirst && isBountyBoard ? "ai-curated" : undefined}
 						>
 							{isBountyBoard && <span>✦</span>}
 							{isBountyBoard ? "AI Curated" : source.name}
 						</span>
 						{pinned && (
-							<span className="px-3 py-1 rounded-lg border border-amber-400 text-amber-400 text-xs font-medium">
+							<span 
+								className="px-3 py-1 rounded-lg border border-amber-400 text-amber-400 text-xs font-medium"
+								data-onboarding={isFirst && pinned ? "pinned-tag" : undefined}
+							>
 								Pinned
 							</span>
 						)}
@@ -227,6 +234,7 @@ function GigCard({ curatedGig }: { curatedGig: CuratedGig }) {
 						target="_blank"
 						rel="noopener noreferrer"
 						className="px-5 py-2.5 rounded-xl text-sm font-medium bg-white/10 text-white/70 hover:bg-white/20 hover:text-white transition-all"
+						data-onboarding={isFirst ? "apply-button" : undefined}
 					>
 						Apply Now
 					</a>
