@@ -15,6 +15,7 @@ function rowToCuratedGig(row: any): CuratedGig {
 		notes: row.notes,
 		customReward: row.custom_reward,
 		aiSummary: row.ai_summary || undefined,
+		pinned: row.pinned || false,
 		addedAt: row.added_at?.toISOString(),
 		approvedAt: row.approved_at?.toISOString(),
 		gig: {
@@ -122,7 +123,7 @@ export async function addCuratedGigToDB(
 // Update a curated gig
 export async function updateCuratedGigInDB(
 	id: string,
-	updates: Partial<Pick<CuratedGig, "status" | "notes" | "customReward">>
+	updates: Partial<Pick<CuratedGig, "status" | "notes" | "customReward" | "pinned">>
 ): Promise<boolean> {
 	try {
 		const now = new Date().toISOString();
@@ -134,6 +135,7 @@ export async function updateCuratedGigInDB(
 				status = COALESCE(${updates.status || null}, status),
 				notes = COALESCE(${updates.notes || null}, notes),
 				custom_reward = COALESCE(${updates.customReward || null}, custom_reward),
+				pinned = COALESCE(${updates.pinned !== undefined ? updates.pinned : null}, pinned),
 				approved_at = COALESCE(${approvedAt}, approved_at),
 				updated_at = ${now}
 			WHERE id = ${id}

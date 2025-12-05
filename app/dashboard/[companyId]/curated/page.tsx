@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { whopsdk } from "@/lib/whop-sdk";
 import { getCuratedGigs } from "@/lib/scrapers";
 import Link from "next/link";
+import Image from "next/image";
 import { CuratedGigsSection } from "../curated-gigs";
 
 export default async function CuratedPage({
@@ -34,9 +35,13 @@ export default async function CuratedPage({
 					<div className="flex items-center justify-between">
 						<div>
 							<div className="flex items-center gap-3 mb-1">
-								<div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-sm font-bold text-black">
-									BB
-								</div>
+								<Image
+									src="/BountyBoardIcon.png"
+									alt="Bounty Board"
+									width={40}
+									height={40}
+									className="rounded-xl"
+								/>
 								<h1 className="text-2xl font-bold text-white">Bounty Board</h1>
 							</div>
 							<p className="text-white/50 text-sm">
@@ -75,7 +80,7 @@ export default async function CuratedPage({
 				{approvedGigs.length === 0 ? (
 					<EmptyState companyId={companyId} />
 				) : (
-					<CuratedGigsSection gigs={approvedGigs} companyId={companyId} />
+					<CuratedGigsSection gigs={approvedGigs} companyId={companyId} mode="board" />
 				)}
 			</main>
 		</div>

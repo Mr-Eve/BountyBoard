@@ -82,18 +82,19 @@ export async function PATCH(request: NextRequest) {
 		}
 
 		const body = await request.json();
-		const { id, status, notes, customReward } = body as {
+		const { id, status, notes, customReward, pinned } = body as {
 			id: string;
 			status?: CuratedGig["status"];
 			notes?: string;
 			customReward?: string;
+			pinned?: boolean;
 		};
 
 		if (!id) {
 			return NextResponse.json({ error: "Missing gig id" }, { status: 400 });
 		}
 
-		const updated = await updateCuratedGig(id, { status, notes, customReward });
+		const updated = await updateCuratedGig(id, { status, notes, customReward, pinned });
 
 		if (!updated) {
 			return NextResponse.json({ error: "Gig not found" }, { status: 404 });

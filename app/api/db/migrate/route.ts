@@ -40,7 +40,23 @@ export async function POST() {
 			}
 		}
 
-		// Migration 3: Ensure all required columns exist
+		// Migration 3: Add pinned column if it doesn't exist
+		try {
+			await sql`
+				ALTER TABLE curated_gigs 
+				ADD COLUMN IF NOT EXISTS pinned BOOLEAN DEFAULT FALSE
+			`;
+			results.push("✓ pinned column added (or already exists)");
+		} catch (e) {
+			const msg = e instanceof Error ? e.message : String(e);
+			if (msg.includes("already exists") || msg.includes("duplicate")) {
+				results.push("✓ pinned column already exists");
+			} else {
+				results.push(`✗ pinned migration failed: ${msg}`);
+			}
+		}
+
+		// Migration 4: Ensure all required columns exist
 		try {
 			// Check if table exists first
 			const tableCheck = await sql`

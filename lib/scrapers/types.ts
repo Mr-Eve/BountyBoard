@@ -69,6 +69,7 @@ export interface CuratedGig {
 	notes?: string; // Leader's notes for members
 	customReward?: string; // Override the budget display
 	aiSummary?: string; // AI-generated summary for bountyboard gigs
+	pinned?: boolean; // Whether the gig is pinned to the top
 	addedAt: string;
 	approvedAt?: string;
 }

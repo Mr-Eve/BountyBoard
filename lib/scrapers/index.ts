@@ -151,7 +151,7 @@ export async function getCuratedGigs(
 
 export async function updateCuratedGig(
 	id: string,
-	updates: Partial<Pick<CuratedGig, "status" | "notes" | "customReward">>
+	updates: Partial<Pick<CuratedGig, "status" | "notes" | "customReward" | "pinned">>
 ): Promise<CuratedGig | null> {
 	// Use database if available
 	if (useDatabase) {

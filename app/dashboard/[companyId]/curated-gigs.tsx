@@ -9,12 +9,14 @@ interface CuratedGigsSectionProps {
 	gigs: CuratedGig[];
 	companyId: string;
 	showViewAll?: boolean;
+	mode?: "board" | "saved"; // board = approved gigs, saved = pending gigs
 }
 
 export function CuratedGigsSection({
 	gigs,
 	companyId,
 	showViewAll,
+	mode = "board",
 }: CuratedGigsSectionProps) {
 	const [updatingGigs, setUpdatingGigs] = useState<Set<string>>(new Set());
 
@@ -32,7 +34,6 @@ export function CuratedGigsSection({
 			});
 
 			if (response.ok) {
-				// Refresh the page to show updated status
 				window.location.reload();
 			}
 		} catch (error) {
@@ -46,9 +47,40 @@ export function CuratedGigsSection({
 		}
 	};
 
+	const handleTogglePin = async (gigId: string, currentlyPinned: boolean) => {
+		setUpdatingGigs((prev) => new Set(prev).add(gigId));
+
+		try {
+			const response = await fetch("/api/gigs/curated", {
+				method: "PATCH",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ id: gigId, pinned: !currentlyPinned }),
+			});
+
+			if (response.ok) {
+				window.location.reload();
+			}
+		} catch (error) {
+			console.error("Failed to toggle pin:", error);
+		} finally {
+			setUpdatingGigs((prev) => {
+				const next = new Set(prev);
+				next.delete(gigId);
+				return next;
+			});
+		}
+	};
+
 	if (gigs.length === 0) {
 		return null;
 	}
+
+	// Sort gigs: pinned first, then by date
+	const sortedGigs = [...gigs].sort((a, b) => {
+		if (a.pinned && !b.pinned) return -1;
+		if (!a.pinned && b.pinned) return 1;
+		return new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime();
+	});
 
 	return (
 		<div>
@@ -67,14 +99,18 @@ export function CuratedGigsSection({
 			)}
 
 			<div className="grid md:grid-cols-2 gap-5">
-				{gigs.map((curatedGig) => (
+				{sortedGigs.map((curatedGig) => (
 					<CuratedGigCard
 						key={curatedGig.id}
 						curatedGig={curatedGig}
 						onUpdateStatus={(status) =>
 							handleUpdateStatus(curatedGig.id, status)
 						}
+						onTogglePin={() =>
+							handleTogglePin(curatedGig.id, curatedGig.pinned || false)
+						}
 						isUpdating={updatingGigs.has(curatedGig.id)}
+						mode={mode}
 					/>
 				))}
 			</div>
@@ -85,20 +121,31 @@ export function CuratedGigsSection({
 function CuratedGigCard({
 	curatedGig,
 	onUpdateStatus,
+	onTogglePin,
 	isUpdating,
+	mode,
 }: {
 	curatedGig: CuratedGig;
 	onUpdateStatus: (status: CuratedGig["status"]) => void;
+	onTogglePin: () => void;
 	isUpdating: boolean;
+	mode: "board" | "saved";
 }) {
-	const { gig, status, notes, customReward, aiSummary } = curatedGig;
+	const { gig, status, notes, customReward, aiSummary, pinned } = curatedGig;
 	const source = SOURCE_INFO[gig.source];
 	const isBountyBoard = gig.source === "bountyboard";
 
 	return (
-		<div className="group relative bg-white/5 hover:bg-white/[0.07] border border-white/10 hover:border-amber-500/30 rounded-2xl p-6 transition-all">
+		<div className={`group relative bg-white/5 hover:bg-white/[0.07] border ${pinned ? "border-amber-500/50" : "border-white/10"} hover:border-amber-500/30 rounded-2xl p-6 transition-all`}>
 			{/* Glow effect on hover */}
 			<div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-amber-500/0 to-orange-500/0 group-hover:from-amber-500/5 group-hover:to-orange-500/5 transition-all" />
+
+			{/* Pinned indicator */}
+			{pinned && (
+				<div className="absolute -top-2 -right-2 bg-amber-500 text-black text-xs font-bold px-2 py-1 rounded-lg">
+					📌 Pinned
+				</div>
+			)}
 
 			<div className="relative">
 				{/* Header */}
@@ -200,24 +247,61 @@ function CuratedGigCard({
 					
 					{/* Actions */}
 					<div className="flex items-center gap-2">
-						{status === "approved" && (
-							<button
-								onClick={() => onUpdateStatus("hidden")}
-								disabled={isUpdating}
-								className="px-4 py-2.5 bg-white/10 text-white/70 hover:bg-white/20 hover:text-white rounded-xl transition-all disabled:opacity-50 text-sm font-medium"
-							>
-								{isUpdating ? "..." : "Hide"}
-							</button>
+						{/* Board mode actions */}
+						{mode === "board" && status === "approved" && (
+							<>
+								<button
+									onClick={onTogglePin}
+									disabled={isUpdating}
+									className={`px-4 py-2.5 rounded-xl transition-all disabled:opacity-50 text-sm font-medium ${
+										pinned
+											? "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
+											: "bg-white/10 text-white/70 hover:bg-white/20 hover:text-white"
+									}`}
+								>
+									{isUpdating ? "..." : pinned ? "Unpin" : "Pin"}
+								</button>
+								<button
+									onClick={() => onUpdateStatus("hidden")}
+									disabled={isUpdating}
+									className="px-4 py-2.5 bg-white/10 text-white/70 hover:bg-white/20 hover:text-white rounded-xl transition-all disabled:opacity-50 text-sm font-medium"
+								>
+									{isUpdating ? "..." : "Remove"}
+								</button>
+							</>
 						)}
+						
+						{/* Saved mode actions */}
+						{mode === "saved" && status === "pending" && (
+							<>
+								<button
+									onClick={() => onUpdateStatus("approved")}
+									disabled={isUpdating}
+									className="px-4 py-2.5 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 rounded-xl transition-all disabled:opacity-50 text-sm font-medium"
+								>
+									{isUpdating ? "..." : "Add"}
+								</button>
+								<button
+									onClick={() => onUpdateStatus("rejected")}
+									disabled={isUpdating}
+									className="px-4 py-2.5 bg-white/10 text-white/70 hover:bg-white/20 hover:text-white rounded-xl transition-all disabled:opacity-50 text-sm font-medium"
+								>
+									{isUpdating ? "..." : "Remove"}
+								</button>
+							</>
+						)}
+						
+						{/* Restore actions for hidden/rejected */}
 						{(status === "rejected" || status === "hidden") && (
 							<button
 								onClick={() => onUpdateStatus("approved")}
 								disabled={isUpdating}
 								className="px-4 py-2.5 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 rounded-xl transition-all disabled:opacity-50 text-sm font-medium"
 							>
-								{isUpdating ? "..." : "Approve"}
+								{isUpdating ? "..." : "Restore"}
 							</button>
 						)}
+						
 						<a
 							href={gig.sourceUrl}
 							target="_blank"
