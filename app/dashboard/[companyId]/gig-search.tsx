@@ -138,7 +138,7 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 
 	return (
 		<div>
-			<h1 className="text-3xl font-bold text-white mb-3">
+			<h1 className="text-5xl font-bold text-white mb-4">
 				Search for Gigs & Opportunities
 			</h1>
 			<p className="text-white/50 text-sm mb-6">
