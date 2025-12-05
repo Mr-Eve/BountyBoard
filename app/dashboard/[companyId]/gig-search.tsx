@@ -141,8 +141,11 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 			<h1 className="font-bold text-white mb-4" style={{ fontSize: '2rem' }}>
 				Search for Gigs & Opportunities
 			</h1>
-			<p className="text-white/50 text-sm mb-6">
-				Search freelance platforms for jobs, plus discover BountyBoard opportunities - service ideas for local businesses based on their pain points.
+			<p className="text-white/50 text-sm mb-1">
+				Search freelance platforms for jobs, plus discover BountyBoard opportunities - 
+			</p>
+			<p className="text-white/50 text-sm mb-1">
+				service ideas for local businesses based on their pain points.
 			</p>
 
 			{/* Search Inputs */}
