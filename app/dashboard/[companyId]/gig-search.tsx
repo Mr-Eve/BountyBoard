@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SOURCE_INFO, type ScrapedGig, type GigSource } from "@/lib/scrapers/types";
 import { formatBudget } from "@/lib/scrapers/base";
 
@@ -347,11 +347,47 @@ function GigResultCard({
 	isSaved: boolean;
 }) {
 	const [isExpanded, setIsExpanded] = useState(false);
+	const [aiSummary, setAiSummary] = useState<string | null>(null);
+	const [isLoadingSummary, setIsLoadingSummary] = useState(false);
 	const source = SOURCE_INFO[gig.source];
 	const isBountyBoard = gig.source === "bountyboard";
 
-	// Generate AI summary for BountyBoard jobs
-	const aiSummary = isBountyBoard ? generateAISummary(gig) : null;
+	// Fetch AI summary for BountyBoard jobs
+	useEffect(() => {
+		if (!isBountyBoard || aiSummary) return;
+		
+		const fetchSummary = async () => {
+			setIsLoadingSummary(true);
+			try {
+				const response = await fetch("/api/ai/summarize", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						businessName: gig.clientInfo?.name || "This business",
+						businessCategory: gig.title.split(" - ").pop()?.replace(" Opportunity", "") || "business",
+						serviceQuery: gig.deadline || "",
+						description: gig.description,
+						reviews: gig.clientInfo?.location || "",
+					}),
+				});
+				
+				if (response.ok) {
+					const data = await response.json();
+					setAiSummary(data.summary);
+				} else {
+					// Fallback to local generation
+					setAiSummary(generateAISummary(gig));
+				}
+			} catch (error) {
+				console.error("Failed to fetch AI summary:", error);
+				setAiSummary(generateAISummary(gig));
+			} finally {
+				setIsLoadingSummary(false);
+			}
+		};
+		
+		fetchSummary();
+	}, [isBountyBoard, gig, aiSummary]);
 
 	return (
 		<div 
@@ -385,11 +421,21 @@ function GigResultCard({
 			</h4>
 
 			{/* AI Summary for BountyBoard jobs */}
-			{isBountyBoard && aiSummary && (
+			{isBountyBoard && (
 				<div className="mb-3 p-3 bg-pink-500/10 border border-pink-500/20 rounded-lg">
-					<p className="text-sm text-pink-200">
-						{aiSummary}
-					</p>
+					{isLoadingSummary ? (
+						<div className="flex items-center gap-2">
+							<svg className="animate-spin h-4 w-4 text-pink-400" viewBox="0 0 24 24">
+								<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+								<path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+							</svg>
+							<span className="text-sm text-pink-300">Generating AI analysis...</span>
+						</div>
+					) : (
+						<p className="text-sm text-pink-200">
+							{aiSummary}
+						</p>
+					)}
 				</div>
 			)}
 
