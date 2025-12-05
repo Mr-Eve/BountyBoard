@@ -3,7 +3,6 @@ import { whopsdk } from "@/lib/whop-sdk";
 import { getCuratedGigs } from "@/lib/scrapers";
 import Link from "next/link";
 import { GigSearchSection } from "./gig-search";
-import { CuratedGigsSection } from "./curated-gigs";
 
 export default async function DashboardPage({
 	params,
@@ -70,17 +69,6 @@ export default async function DashboardPage({
 			<main className="max-w-7xl mx-auto px-6 py-8">
 				{/* Gig Search Section */}
 				<GigSearchSection companyId={companyId} />
-
-				{/* Recently Curated */}
-				{curatedGigs.length > 0 && (
-					<div className="mt-12">
-						<CuratedGigsSection
-							gigs={curatedGigs.slice(0, 5)}
-							companyId={companyId}
-							showViewAll
-						/>
-					</div>
-				)}
 			</main>
 		</div>
 	);
