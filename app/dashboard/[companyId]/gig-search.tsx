@@ -557,55 +557,172 @@ function GigResultCard({
 // Generate AI summary for BountyBoard jobs based on the service being offered
 function generateAISummary(gig: ScrapedGig): string {
 	const businessName = gig.clientInfo?.name || "This business";
-	const businessCategory = gig.title.split(" - ").pop()?.replace(" Opportunity", "") || "business";
+	const businessCategory = gig.title.split(" - ").pop()?.replace(" Opportunity", "").toLowerCase() || "business";
 	
 	// The service query is stored in the deadline field (repurposed)
 	const serviceQuery = gig.deadline || "";
 	
 	if (!serviceQuery) {
-		// Fallback for old format
-		return `${businessName} is a potential client for your services. Reach out to discuss how you can help their business grow.`;
+		return `${businessName} is a potential client. Reach out to discuss how you can help their business grow.`;
 	}
 	
-	// Format the service name nicely
-	const serviceName = serviceQuery
-		.split(" ")
-		.map(word => word.charAt(0).toUpperCase() + word.slice(1))
-		.join(" ");
+	const queryLower = serviceQuery.toLowerCase();
 	
-	// Generate contextual summary based on the service type
-	const serviceContexts: Record<string, string> = {
-		"ai": `${businessName} is a ${businessCategory} that could leverage AI to automate tasks, improve customer service, or gain insights from their data.`,
-		"artificial intelligence": `${businessName} could use AI solutions to streamline operations, enhance customer experiences, or make data-driven decisions.`,
-		"machine learning": `${businessName} has data from customer interactions that could be used for ML-powered recommendations, predictions, or automation.`,
-		"chatbot": `${businessName} handles customer inquiries that could be automated with a chatbot, improving response times and freeing up staff.`,
-		"automation": `${businessName} likely has repetitive processes that could be automated to save time and reduce errors.`,
-		"data": `${businessName} generates customer and business data that could be better utilized for insights and decision-making.`,
-		"analytics": `${businessName} could benefit from better analytics to understand customer behavior and optimize operations.`,
-		"web": `${businessName} could use an improved web presence to attract more customers and provide better online experiences.`,
-		"website": `${businessName} could benefit from a modern, professional website to establish credibility and capture leads.`,
-		"seo": `${businessName} could rank higher in local search results with proper SEO, bringing in more organic customers.`,
-		"marketing": `${businessName} could reach more potential customers with targeted digital marketing strategies.`,
-		"social": `${businessName} could build a stronger community and brand presence through active social media engagement.`,
-		"content": `${businessName} could establish thought leadership and attract customers through quality content marketing.`,
-		"video": `${businessName} could showcase their services and build trust with professional video content.`,
-		"crm": `${businessName} could better manage customer relationships and follow-ups with a proper CRM system.`,
-		"email": `${businessName} could nurture leads and retain customers with strategic email marketing campaigns.`,
-		"booking": `${businessName} could reduce no-shows and phone calls with an online booking system.`,
-		"ecommerce": `${businessName} could expand their revenue by selling products or services online.`,
-		"app": `${businessName} could improve customer engagement with a dedicated mobile app.`,
+	// Business-specific service mappings - how each service helps specific business types
+	const businessServiceMap: Record<string, Record<string, string>> = {
+		// Restaurants & Food
+		"restaurant": {
+			"design": `${businessName} could use a menu redesign to highlight high-margin dishes, or updated branding to stand out on delivery apps where visual appeal drives orders.`,
+			"web": `${businessName} needs a website with online ordering integration - restaurants without this lose 30% of potential orders to competitors.`,
+			"website": `${businessName} could convert more searchers into diners with a website featuring their menu, photos of signature dishes, and easy reservation booking.`,
+			"seo": `${businessName} is missing local search traffic. "Best ${businessCategory} near me" searches could bring them 50+ new customers monthly with proper SEO.`,
+			"social": `${businessName} could showcase daily specials and behind-the-scenes kitchen content to build a loyal following that drives repeat visits.`,
+			"photo": `${businessName} needs professional food photography - appetizing images increase online orders by up to 30%.`,
+			"video": `${businessName} could create short-form content showing dish preparation to go viral on TikTok/Reels and attract younger diners.`,
+			"marketing": `${businessName} could run targeted ads to nearby residents during dinner decision hours (4-6pm) when people are deciding where to eat.`,
+			"app": `${businessName} could build customer loyalty with an app featuring rewards, easy reordering, and push notifications for specials.`,
+			"booking": `${businessName} loses reservations when the phone goes unanswered. An online booking system captures those customers 24/7.`,
+		},
+		"cafe": {
+			"design": `${businessName} could refresh their brand identity to attract remote workers looking for aesthetic workspaces to post on Instagram.`,
+			"web": `${businessName} needs a website showing their space, menu, and WiFi availability - key factors for the remote work crowd.`,
+			"social": `${businessName} could build a community of regulars by featuring customer photos and promoting their cozy atmosphere online.`,
+			"photo": `${businessName} needs Instagram-worthy photos of their drinks and space to attract the social media-savvy coffee crowd.`,
+		},
+		"bakery": {
+			"design": `${businessName} could elevate their packaging design to make their products gift-worthy and Instagram-shareable.`,
+			"web": `${businessName} needs online ordering for custom cakes and pre-orders - this alone could increase revenue 40%.`,
+			"photo": `${businessName} needs drool-worthy photos of their baked goods that make people stop scrolling and start ordering.`,
+			"ecommerce": `${businessName} could ship signature items nationwide - many bakeries have built 6-figure online businesses this way.`,
+		},
+		// Health & Fitness
+		"gym": {
+			"design": `${businessName} could modernize their brand to compete with boutique fitness studios that are stealing their younger demographic.`,
+			"web": `${businessName} needs a website with class schedules, trainer bios, and online membership signup to convert website visitors.`,
+			"app": `${businessName} could increase retention with an app for class booking, workout tracking, and community challenges.`,
+			"video": `${businessName} could offer on-demand workout videos as a premium membership tier, creating recurring revenue.`,
+			"marketing": `${businessName} could target New Year's resolution makers and summer body seekers with seasonal ad campaigns.`,
+		},
+		"spa": {
+			"design": `${businessName} could create a luxurious brand identity that justifies premium pricing and attracts high-end clients.`,
+			"web": `${businessName} needs an elegant website with service menus, pricing, and easy online booking to capture impulse bookings.`,
+			"booking": `${businessName} loses 20% of potential appointments when clients can't book outside business hours. Online booking fixes this.`,
+			"photo": `${businessName} needs serene, professional imagery that conveys the relaxation experience before clients even arrive.`,
+			"email": `${businessName} could drive repeat visits with automated birthday offers and "we miss you" campaigns to lapsed clients.`,
+		},
+		"salon": {
+			"design": `${businessName} could update their brand to reflect current style trends and attract fashion-forward clients.`,
+			"web": `${businessName} needs a portfolio website showcasing their stylists' work - clients want to see results before booking.`,
+			"booking": `${businessName} could reduce no-shows by 50% with automated appointment reminders and easy rescheduling.`,
+			"social": `${businessName} should post before/after transformations - this content consistently goes viral and drives bookings.`,
+			"photo": `${businessName} needs professional before/after photos that showcase their stylists' skills and build trust.`,
+		},
+		"dentist": {
+			"design": `${businessName} could create a friendly, modern brand that reduces dental anxiety and appeals to families.`,
+			"web": `${businessName} needs a website with patient testimonials, insurance info, and online appointment requests to convert searchers.`,
+			"seo": `${businessName} is losing patients to competitors ranking higher for "dentist near me" - local SEO could change this.`,
+			"video": `${businessName} could create educational content about procedures to build trust and reduce patient anxiety.`,
+			"marketing": `${businessName} could target new movers in the area who are actively searching for a new dentist.`,
+		},
+		// Professional Services
+		"lawyer": {
+			"design": `${businessName} could establish credibility with a professional brand identity that conveys expertise and trustworthiness.`,
+			"web": `${businessName} needs a website with practice area pages, attorney bios, and case results to convert potential clients.`,
+			"seo": `${businessName} could capture high-intent searches like "${businessCategory} lawyer near me" that indicate immediate need.`,
+			"content": `${businessName} could establish thought leadership with legal guides that rank in search and demonstrate expertise.`,
+			"video": `${businessName} could create FAQ videos answering common legal questions to build trust before the consultation.`,
+		},
+		"accountant": {
+			"design": `${businessName} could modernize their brand to attract younger business owners who expect digital-first services.`,
+			"web": `${businessName} needs a website with service packages, pricing transparency, and easy contact forms for tax season leads.`,
+			"automation": `${businessName} could automate client onboarding and document collection, saving 10+ hours per week.`,
+			"marketing": `${businessName} could run targeted campaigns before tax deadlines when business owners are actively seeking help.`,
+		},
+		// Retail
+		"store": {
+			"design": `${businessName} could refresh their visual identity to compete with modern DTC brands entering their market.`,
+			"web": `${businessName} needs an ecommerce website to capture online sales - retail without online presence loses 40% of potential revenue.`,
+			"ecommerce": `${businessName} could expand beyond local foot traffic by selling online to customers nationwide.`,
+			"photo": `${businessName} needs professional product photography that makes their items look as good online as in-store.`,
+			"social": `${businessName} could showcase new arrivals and style inspiration to drive both online and in-store traffic.`,
+			"email": `${businessName} could drive repeat purchases with new arrival alerts and exclusive subscriber discounts.`,
+		},
+		"boutique": {
+			"design": `${businessName} could create a cohesive brand aesthetic across packaging, tags, and social media that commands premium pricing.`,
+			"web": `${businessName} needs a beautiful ecommerce site that reflects their curated in-store experience.`,
+			"photo": `${businessName} needs lifestyle photography showing their products styled in aspirational settings.`,
+			"social": `${businessName} could build a style-focused Instagram presence that turns followers into customers.`,
+		},
+		// Home Services
+		"plumber": {
+			"design": `${businessName} could stand out from competitors with professional truck wraps and uniforms that build trust.`,
+			"web": `${businessName} needs a website with services, service areas, and emergency contact info for urgent searches.`,
+			"seo": `${businessName} could dominate "emergency plumber" searches in their area - these are high-value, immediate-need customers.`,
+			"marketing": `${businessName} could run Google Ads targeting homeowners searching for plumbing services right now.`,
+		},
+		"contractor": {
+			"design": `${businessName} could create professional proposals and presentations that help win bigger contracts.`,
+			"web": `${businessName} needs a portfolio website showcasing completed projects to build credibility with potential clients.`,
+			"photo": `${businessName} needs before/after project photos that demonstrate the quality of their work.`,
+			"video": `${businessName} could create time-lapse videos of projects that showcase their craftsmanship and go viral.`,
+		},
+		// Real Estate
+		"realtor": {
+			"design": `${businessName} could create a personal brand that stands out in a sea of generic real estate marketing.`,
+			"web": `${businessName} needs an IDX-integrated website with listings and neighborhood guides to capture buyer leads.`,
+			"photo": `${businessName} needs professional listing photography - homes with pro photos sell 32% faster.`,
+			"video": `${businessName} could create virtual tours and neighborhood videos that attract out-of-town buyers.`,
+			"social": `${businessName} could showcase listings and local expertise on social media to stay top-of-mind with potential clients.`,
+			"marketing": `${businessName} could run targeted ads to likely home sellers based on home equity and length of ownership.`,
+		},
 	};
 	
-	// Find matching context
-	const queryLower = serviceQuery.toLowerCase();
-	for (const [keyword, context] of Object.entries(serviceContexts)) {
-		if (queryLower.includes(keyword)) {
-			return context + " This is a great outreach opportunity!";
+	// Service-specific fallbacks for business types not explicitly mapped
+	const serviceDefaults: Record<string, (name: string, category: string) => string> = {
+		"design": (name, cat) => `${name} could attract more customers with refreshed branding that communicates quality and professionalism. A cohesive visual identity across signage, menus, and digital presence builds trust and justifies premium pricing.`,
+		"graphic": (name, cat) => `${name} could stand out from competitors with professional graphics for their marketing materials, social media, and storefront that catch attention and communicate their unique value.`,
+		"web": (name, cat) => `${name} is losing potential customers who search online first. A professional website with clear services, pricing, and easy contact options converts searchers into paying customers.`,
+		"website": (name, cat) => `${name} needs a website that works as a 24/7 salesperson - showcasing their work, answering common questions, and making it easy to take the next step.`,
+		"seo": (name, cat) => `${name} could capture customers actively searching for "${cat} near me" - these high-intent searches represent people ready to buy, not just browse.`,
+		"social": (name, cat) => `${name} could build a loyal community by sharing behind-the-scenes content, customer stories, and timely updates that keep them top-of-mind when people need a ${cat}.`,
+		"marketing": (name, cat) => `${name} could reach their ideal customers with targeted digital ads that appear exactly when people are searching for ${cat} services in their area.`,
+		"video": (name, cat) => `${name} could showcase their expertise and personality through video content that builds trust before customers ever walk through the door.`,
+		"photo": (name, cat) => `${name} needs professional photography that makes their ${cat === "business" ? "products and services" : cat} look as good online as they are in person.`,
+		"content": (name, cat) => `${name} could attract customers through helpful content that answers their questions and establishes ${name} as the go-to expert in their area.`,
+		"email": (name, cat) => `${name} could turn one-time customers into regulars with email campaigns featuring special offers, updates, and reminders that drive repeat business.`,
+		"booking": (name, cat) => `${name} is losing appointments when customers can't book outside business hours. Online booking captures these customers 24/7 and reduces no-shows with automated reminders.`,
+		"app": (name, cat) => `${name} could increase customer loyalty and repeat business with a mobile app featuring easy booking, rewards, and personalized notifications.`,
+		"ecommerce": (name, cat) => `${name} could expand beyond their local area by selling online, turning a local ${cat} into a business with nationwide reach.`,
+		"automation": (name, cat) => `${name} could save hours every week by automating repetitive tasks like appointment reminders, follow-ups, and customer communications.`,
+		"ai": (name, cat) => `${name} could use AI to automate customer inquiries, personalize recommendations, and free up staff to focus on high-value work.`,
+		"chatbot": (name, cat) => `${name} could capture leads and answer common questions 24/7 with a chatbot, ensuring no customer inquiry goes unanswered.`,
+		"crm": (name, cat) => `${name} could track customer interactions and automate follow-ups with a CRM, ensuring no lead falls through the cracks.`,
+		"branding": (name, cat) => `${name} could command higher prices and attract better customers with professional branding that communicates quality and builds instant trust.`,
+		"logo": (name, cat) => `${name} could establish a memorable identity with a professional logo that looks great on signage, business cards, and social media.`,
+		"print": (name, cat) => `${name} could leave a lasting impression with professionally designed business cards, flyers, and marketing materials.`,
+	};
+	
+	// Try to find a specific business + service match first
+	for (const [bizType, services] of Object.entries(businessServiceMap)) {
+		if (businessCategory.includes(bizType) || gig.title.toLowerCase().includes(bizType)) {
+			for (const [serviceKey, message] of Object.entries(services)) {
+				if (queryLower.includes(serviceKey)) {
+					return message;
+				}
+			}
 		}
 	}
 	
-	// Generic but service-specific fallback
-	return `${businessName} is a ${businessCategory} that could benefit from ${serviceName.toLowerCase()} services. Reach out to discuss how you can help their business.`;
+	// Fall back to service-specific defaults
+	for (const [serviceKey, messageFn] of Object.entries(serviceDefaults)) {
+		if (queryLower.includes(serviceKey)) {
+			return messageFn(businessName, businessCategory);
+		}
+	}
+	
+	// Final fallback
+	const serviceName = serviceQuery.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+	return `${businessName} could benefit from ${serviceName.toLowerCase()} services. Analyze their current online presence and reviews to identify specific pain points you can solve, then reach out with a tailored pitch.`;
 }
 
 function formatTimeAgo(dateString: string): string {
