@@ -152,7 +152,10 @@ function CuratedGigCard({
 							{isBountyBoard ? "AI Curated" : source.name}
 						</span>
 						{pinned && (
-							<span className="px-3 py-1 rounded-lg border border-amber-400 text-amber-400 text-xs font-medium">
+							<span 
+								className="px-3 py-1 rounded-lg border text-xs font-medium"
+								style={{ borderColor: "#ffc000", color: "#ffc000" }}
+							>
 								Pinned
 							</span>
 						)}

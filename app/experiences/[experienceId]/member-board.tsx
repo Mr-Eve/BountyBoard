@@ -137,7 +137,8 @@ function GigCard({ curatedGig, isFirst = false }: { curatedGig: CuratedGig; isFi
 						</span>
 						{pinned && (
 							<span 
-								className="px-3 py-1 rounded-lg border border-amber-400 text-amber-400 text-xs font-medium"
+								className="px-3 py-1 rounded-lg border text-xs font-medium"
+								style={{ borderColor: "#ffc000", color: "#ffc000" }}
 								data-onboarding={isFirst && pinned ? "pinned-tag" : undefined}
 							>
 								Pinned
