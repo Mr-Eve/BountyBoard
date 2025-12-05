@@ -5,13 +5,10 @@ import { formatBudget } from "@/lib/scrapers/base";
 
 export default async function ExperiencePage({
 	params,
-	searchParams,
 }: {
 	params: Promise<{ experienceId: string }>;
-	searchParams: Promise<{ source?: string }>;
 }) {
 	const { experienceId } = await params;
-	const { source: filterSource } = await searchParams;
 
 	// Verify user is logged in
 	const { userId } = await whopsdk.verifyUserToken(await headers());
@@ -27,17 +24,9 @@ export default async function ExperiencePage({
 			: experience.company.id;
 
 	// Get approved gigs for members
-	let gigs = await getApprovedGigs(companyId);
-
-	// Filter by source if specified
-	if (filterSource && filterSource !== "all") {
-		gigs = gigs.filter((g) => g.gig.source === filterSource);
-	}
+	const gigs = await getApprovedGigs(companyId);
 
 	const displayName = user.name || `@${user.username}`;
-
-	// Get unique sources for filtering
-	const availableSources = [...new Set(gigs.map((g) => g.gig.source))];
 
 	return (
 		<div className="min-h-screen bg-[#0a0a0b]">
@@ -75,31 +64,6 @@ export default async function ExperiencePage({
 			</header>
 
 			<main className="max-w-6xl mx-auto px-6 py-8">
-				{/* Source Filter */}
-				{availableSources.length > 1 && (
-					<div className="flex items-center gap-2 mb-8 overflow-x-auto pb-2">
-						<SourcePill
-							source="all"
-							label="All Sources"
-							active={!filterSource || filterSource === "all"}
-							experienceId={experienceId}
-						/>
-						{availableSources.map((source) => {
-							const info = SOURCE_INFO[source];
-							return (
-								<SourcePill
-									key={source}
-									source={source}
-									label={info.name}
-									color={info.color}
-									active={filterSource === source}
-									experienceId={experienceId}
-								/>
-							);
-						})}
-					</div>
-				)}
-
 				{/* Gigs Grid */}
 				{gigs.length === 0 ? (
 					<EmptyState />
@@ -118,44 +82,10 @@ export default async function ExperiencePage({
 	);
 }
 
-function SourcePill({
-	source,
-	label,
-	color,
-	active,
-	experienceId,
-}: {
-	source: string;
-	label: string;
-	color?: string;
-	active: boolean;
-	experienceId: string;
-}) {
-	const href =
-		source === "all"
-			? `/experiences/${experienceId}`
-			: `/experiences/${experienceId}?source=${source}`;
-
-	return (
-		<a
-			href={href}
-			style={!active && color ? { backgroundColor: color } : undefined}
-			className={`shrink-0 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-				active
-					? "bg-gradient-to-r from-amber-500 to-orange-500 text-black"
-					: color
-					? "text-white hover:opacity-80"
-					: "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"
-			}`}
-		>
-			{label}
-		</a>
-	);
-}
-
 function GigCard({ curatedGig }: { curatedGig: CuratedGig }) {
 	const { gig, customReward, notes } = curatedGig;
 	const source = SOURCE_INFO[gig.source];
+	const isBountyBoard = gig.source === "bountyboard";
 
 	return (
 		<div className="group relative bg-white/5 hover:bg-white/[0.07] border border-white/10 hover:border-amber-500/30 rounded-2xl p-6 transition-all">
@@ -167,9 +97,10 @@ function GigCard({ curatedGig }: { curatedGig: CuratedGig }) {
 				<div className="flex items-start justify-between gap-4 mb-4">
 					<span
 						style={{ backgroundColor: source.color }}
-						className="px-3 py-1 rounded-lg text-white text-xs font-medium"
+						className="px-3 py-1 rounded-lg text-white text-xs font-medium flex items-center gap-1"
 					>
-						{source.name}
+						{isBountyBoard && <span>✦</span>}
+						{isBountyBoard ? "AI Curated" : source.name}
 					</span>
 					{gig.clientInfo?.rating && (
 						<span className="px-2 py-1 bg-amber-500/20 text-amber-400 rounded-lg text-xs font-medium">
