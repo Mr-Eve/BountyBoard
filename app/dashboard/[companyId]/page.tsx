@@ -68,30 +68,6 @@ export default async function DashboardPage({
 			</div>
 
 			<main className="max-w-7xl mx-auto px-6 py-8">
-				{/* Stats */}
-				<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-					<StatCard
-						label="Total Curated"
-						value={curatedGigs.length}
-						color="from-white/10 to-white/5"
-					/>
-					<StatCard
-						label="Approved"
-						value={approvedCount}
-						color="from-emerald-500/20 to-emerald-500/5"
-					/>
-					<StatCard
-						label="Pending Review"
-						value={pendingCount}
-						color="from-amber-500/20 to-amber-500/5"
-					/>
-					<StatCard
-						label="Sources"
-						value={8}
-						color="from-blue-500/20 to-blue-500/5"
-					/>
-				</div>
-
 				{/* Gig Search Section */}
 				<GigSearchSection companyId={companyId} />
 
@@ -133,21 +109,3 @@ function TabLink({
 	);
 }
 
-function StatCard({
-	label,
-	value,
-	color,
-}: {
-	label: string;
-	value: number;
-	color: string;
-}) {
-	return (
-		<div
-			className={`bg-gradient-to-br ${color} border border-white/10 rounded-2xl p-5`}
-		>
-			<p className="text-white/50 text-sm mb-2">{label}</p>
-			<p className="text-3xl font-bold text-white">{value}</p>
-		</div>
-	);
-}
