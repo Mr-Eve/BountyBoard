@@ -141,7 +141,7 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 			<h1 className="font-bold text-white mb-4" style={{ fontSize: '2rem' }}>
 				Search for Gigs & Opportunities
 			</h1>
-			<p className="text-white/50 text-sm mb-1" style={{ fontSize: '.9rem' }}>
+			<p className="text-white/50 text-sm mb-1" style={{ fontSize: '.8rem', paddingBottom: '10px' }}>
 				Search freelance platforms for jobs, plus discover 
 				<br />
 				service ideas for AI-curated opportunities - 
