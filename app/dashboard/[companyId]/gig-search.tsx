@@ -24,6 +24,7 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 	const [enabledSources, setEnabledSources] = useState<Set<GigSource>>(
 		new Set(AVAILABLE_SOURCES)
 	);
+	const [showAdvanced, setShowAdvanced] = useState(false);
 
 	const toggleSource = (source: GigSource) => {
 		setEnabledSources((prev) => {
@@ -145,7 +146,7 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 			</p>
 
 			{/* Search Inputs */}
-			<div className="flex flex-col md:flex-row gap-3 mb-6">
+			<div className="flex flex-col md:flex-row gap-3 mb-4">
 				<div className="flex-1 relative">
 					<input
 						type="text"
@@ -153,16 +154,6 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 						onChange={(e) => setQuery(e.target.value)}
 						onKeyDown={(e) => e.key === "Enter" && handleSearch()}
 						placeholder="Service type (e.g., 'web design', 'SEO', 'booking system')"
-						className="w-full px-5 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-amber-500/50 focus:bg-white/[0.07] transition-all"
-					/>
-				</div>
-				<div className="md:w-64 relative">
-					<input
-						type="text"
-						value={location}
-						onChange={(e) => setLocation(e.target.value)}
-						onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-						placeholder="Location (e.g., 'Austin, TX')"
 						className="w-full px-5 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-amber-500/50 focus:bg-white/[0.07] transition-all"
 					/>
 				</div>
@@ -197,40 +188,73 @@ export function GigSearchSection({ companyId }: GigSearchSectionProps) {
 				</button>
 			</div>
 
-			<p className="text-white/30 text-xs mb-4">
-				Add a location to find BountyBoard Jobs - real local businesses that need your services
-			</p>
+			{/* Advanced Search Toggle */}
+			<button
+				onClick={() => setShowAdvanced(!showAdvanced)}
+				className="flex items-center gap-2 text-white/50 hover:text-white/70 text-sm mb-4 transition-colors"
+			>
+				<svg
+					className={`w-4 h-4 transition-transform ${showAdvanced ? "rotate-90" : ""}`}
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+				</svg>
+				Advanced Search
+			</button>
 
-			{/* Source Pills - Clickable to toggle */}
-			<div className="mb-6">
-				<p className="text-white/50 text-xs mb-2">Click to toggle sources:</p>
-				<div className="flex flex-wrap gap-2">
-					{AVAILABLE_SOURCES.map((source) => {
-						const info = SOURCE_INFO[source];
-						const isEnabled = enabledSources.has(source);
-						return (
-							<button
-								key={source}
-								onClick={() => toggleSource(source)}
-								style={{ 
-									backgroundColor: isEnabled ? info.color : "transparent",
-									borderColor: info.color,
-								}}
-								className={`px-3 py-1.5 rounded-lg text-xs font-medium border-2 transition-all ${
-									isEnabled 
-										? "text-white" 
-										: "text-white/50 hover:text-white/70"
-								}`}
-							>
-								{source === "bountyboard" ? "BountyBoard Jobs" : info.name}
-								{!isEnabled && (
-									<span className="ml-1 opacity-50">(off)</span>
-								)}
-							</button>
-						);
-					})}
+			{/* Advanced Search Options */}
+			{showAdvanced && (
+				<div className="mb-6 p-4 bg-white/5 border border-white/10 rounded-xl space-y-4">
+					{/* Location Input */}
+					<div>
+						<label className="text-white/50 text-xs mb-2 block">Location (for BountyBoard Jobs)</label>
+						<input
+							type="text"
+							value={location}
+							onChange={(e) => setLocation(e.target.value)}
+							onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+							placeholder="e.g., 'Austin, TX'"
+							className="w-full md:w-64 px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/30 focus:outline-none focus:border-amber-500/50 focus:bg-white/[0.07] transition-all text-sm"
+						/>
+						<p className="text-white/30 text-xs mt-1.5">
+							Add a location to find BountyBoard Jobs - real local businesses that need your services
+						</p>
+					</div>
+
+					{/* Source Pills - Clickable to toggle */}
+					<div>
+						<p className="text-white/50 text-xs mb-2">Click to toggle sources:</p>
+						<div className="flex flex-wrap gap-2">
+							{AVAILABLE_SOURCES.map((source) => {
+								const info = SOURCE_INFO[source];
+								const isEnabled = enabledSources.has(source);
+								return (
+									<button
+										key={source}
+										onClick={() => toggleSource(source)}
+										style={{ 
+											backgroundColor: isEnabled ? info.color : "transparent",
+											borderColor: info.color,
+										}}
+										className={`px-3 py-1.5 rounded-lg text-xs font-medium border-2 transition-all ${
+											isEnabled 
+												? "text-white" 
+												: "text-white/50 hover:text-white/70"
+										}`}
+									>
+										{source === "bountyboard" ? "BountyBoard Jobs" : info.name}
+										{!isEnabled && (
+											<span className="ml-1 opacity-50">(off)</span>
+										)}
+									</button>
+								);
+							})}
+						</div>
+					</div>
 				</div>
-			</div>
+			)}
 
 			{/* Results */}
 			{hasSearched && (
